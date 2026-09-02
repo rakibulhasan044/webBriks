@@ -1,0 +1,16 @@
+model User {
+    id           String   @id @default(uuid())
+    email        String   @unique
+    passwordHash String
+    name         String
+    createdAt    DateTime @default(now())
+    updatedAt    DateTime @updatedAt
+
+    @@map("users")
+}
+
+enum BoardRole {
+    OWNER
+    EDITOR
+    VIEWER
+}
