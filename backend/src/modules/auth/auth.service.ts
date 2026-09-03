@@ -4,15 +4,17 @@ import { JwtService } from '@nestjs/jwt';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import * as bcrypt from 'bcrypt';
+import { MinioService } from '../minio/minio.service';
 
 @Injectable()
 export class AuthService {
   constructor(
     private readonly prismaService: PrismaService,
     private readonly jwtService: JwtService,
+    private readonly minioService: MinioService,
   ) {}
 
-  async register(registerDto: RegisterDto) {
+  async register(registerDto: RegisterDto, photo?: Express.Multer.File) {
     const { name, email, password } = registerDto;
 
     // Check if user already exists
@@ -27,6 +29,12 @@ export class AuthService {
     // Hash the password
     const saltOrRounds = 10;
     const passwordHash = await bcrypt.hash(password, saltOrRounds);
+    
+    // Handle optional photo upload
+    let photoUrl: string | null = null;
+    if (photo) {
+      photoUrl = await this.minioService.uploadFile(photo, 'profiles');
+    }
 
     // Create the user
     const user = await this.prismaService.user.create({
@@ -34,6 +42,7 @@ export class AuthService {
         name,
         email,
         passwordHash,
+        photo: photoUrl,
       },
     });
 
@@ -48,6 +57,7 @@ export class AuthService {
         id: user.id,
         name: user.name,
         email: user.email,
+        photo: user.photo,
       },
     };
   }
@@ -82,6 +92,7 @@ export class AuthService {
         id: user.id,
         name: user.name,
         email: user.email,
+        photo: user.photo,
       },
     };
   }
