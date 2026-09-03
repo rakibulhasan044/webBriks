@@ -7,6 +7,7 @@ import { PrismaService } from '../../prisma/prisma.service';
 import { JwtService } from '@nestjs/jwt';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
+import { ChangePasswordDto } from './dto/change-password.dto';
 import * as bcrypt from 'bcrypt';
 import { MinioService } from '../minio/minio.service';
 
@@ -101,5 +102,71 @@ export class AuthService {
         createdAt: 'desc',
       },
     });
+  }
+
+  async getMe(userId: string) {
+    const user = await this.prismaService.user.findUnique({
+      where: { id: userId },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        photo: true,
+        createdAt: true,
+        updatedAt: true,
+      },
+    });
+
+    if (!user) throw new UnauthorizedException('User not found');
+    return user;
+  }
+
+  async updateProfile(userId: string, name?: string, photo?: Express.Multer.File) {
+    const user = await this.prismaService.user.findUnique({ where: { id: userId } });
+    if (!user) throw new UnauthorizedException('User not found');
+
+    let photoUrl = user.photo;
+    if (photo) {
+      photoUrl = await this.minioService.uploadFile(photo, 'profiles');
+      
+      // Clean up old profile picture from MinIO
+      if (user.photo) {
+        await this.minioService.deleteFile(user.photo);
+      }
+    }
+
+    return this.prismaService.user.update({
+      where: { id: userId },
+      data: {
+        ...(name && { name }),
+        photo: photoUrl,
+      },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        photo: true,
+      },
+    });
+  }
+
+  async changePassword(userId: string, dto: ChangePasswordDto) {
+    const user = await this.prismaService.user.findUnique({ where: { id: userId } });
+    if (!user) throw new UnauthorizedException('User not found');
+
+    const isPasswordValid = await bcrypt.compare(dto.oldPassword, user.passwordHash);
+    if (!isPasswordValid) {
+      throw new ConflictException('Incorrect old password');
+    }
+
+    const saltOrRounds = 10;
+    const newPasswordHash = await bcrypt.hash(dto.newPassword, saltOrRounds);
+
+    await this.prismaService.user.update({
+      where: { id: userId },
+      data: { passwordHash: newPasswordHash },
+    });
+
+    return { success: true };
   }
 }

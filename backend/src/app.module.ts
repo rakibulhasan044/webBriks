@@ -8,6 +8,8 @@ import { AuthModule } from './modules/auth/auth.module';
 import { MinioModule } from './modules/minio/minio.module';
 import { BoardModule } from './modules/board/board.module';
 import { BoardMemberModule } from './modules/board-member/board-member.module';
+import { ColumnModule } from './modules/column/column.module';
+import { TaskModule } from './modules/task/task.module';
 import appConfig from './config/app.config';
 import { fileConfig, minioConfig } from './config/file.config';
 
@@ -23,6 +25,8 @@ import { fileConfig, minioConfig } from './config/file.config';
     MinioModule,
     BoardModule,
     BoardMemberModule,
+    ColumnModule,
+    TaskModule,
   ],
   controllers: [AppController],
   providers: [AppService],

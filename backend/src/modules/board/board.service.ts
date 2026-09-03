@@ -28,7 +28,17 @@ export class BoardService {
         description: createBoardDto.description,
         coverImage: coverImageUrl,
         ownerId: userId,
+        columns: {
+          create: [
+            { title: 'To Do', position: 1000 },
+            { title: 'In Progress', position: 2000 },
+            { title: 'Done', position: 3000 },
+          ]
+        }
       },
+      include: {
+        columns: true
+      }
     });
   }
 

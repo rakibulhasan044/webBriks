@@ -10,6 +10,9 @@ async function bootstrap() {
     logger: ['error', 'warn', 'log', 'debug', 'verbose'],
   });
 
+  // Enable CORS for frontend integration
+  app.enableCors();
+
   const configService = app.get(ConfigService<AllConfigType>);
 
   const nodeEnv = configService.get('app.nodeEnv', { infer: true });
