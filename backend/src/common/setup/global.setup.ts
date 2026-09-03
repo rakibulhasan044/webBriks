@@ -9,6 +9,7 @@ import { Reflector } from '@nestjs/core';
 import { ValidationError } from 'class-validator';
 import { AllConfigType } from '../types/config.type';
 import { TransformInterceptor } from '../interceptor/transform.interceptor';
+import { GlobalExceptionFilter } from '../filter/global-exception.filter';
 
 // Define proper types for the error structure
 interface ValidationErrorDetail {
@@ -104,7 +105,7 @@ export function setupGlobalConfig(app: INestApplication) {
   app.setGlobalPrefix(apiPrefix);
 
   // Global Exception Filter
-  //   app.useGlobalFilters(new GlobalExceptionFilter());
+    app.useGlobalFilters(new GlobalExceptionFilter());
 
   // Global Response Interceptor
   const reflector = app.get(Reflector);
