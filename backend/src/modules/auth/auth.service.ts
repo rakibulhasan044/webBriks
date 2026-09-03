@@ -1,4 +1,8 @@
-import { Injectable, UnauthorizedException, ConflictException } from '@nestjs/common';
+import {
+  Injectable,
+  UnauthorizedException,
+  ConflictException,
+} from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { JwtService } from '@nestjs/jwt';
 import { RegisterDto } from './dto/register.dto';
@@ -29,7 +33,7 @@ export class AuthService {
     // Hash the password
     const saltOrRounds = 10;
     const passwordHash = await bcrypt.hash(password, saltOrRounds);
-    
+
     // Handle optional photo upload
     let photoUrl: string | null = null;
     if (photo) {
@@ -46,13 +50,7 @@ export class AuthService {
       },
     });
 
-    // Generate JWT token
-    const payload = { sub: user.id, email: user.email };
-    const token = await this.jwtService.signAsync(payload);
-
     return {
-      message: 'Registration successful',
-      token,
       user: {
         id: user.id,
         name: user.name,
@@ -86,14 +84,7 @@ export class AuthService {
     const token = await this.jwtService.signAsync(payload);
 
     return {
-      message: 'Login successful',
       token,
-      user: {
-        id: user.id,
-        name: user.name,
-        email: user.email,
-        photo: user.photo,
-      },
     };
   }
 }

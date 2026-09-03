@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEmail, IsNotEmpty, IsString, MinLength } from 'class-validator';
+import { IsEmail, IsNotEmpty, IsOptional, IsString, MinLength } from 'class-validator';
 
 export class RegisterDto {
   @ApiProperty({
@@ -40,4 +40,13 @@ export class RegisterDto {
     message: 'Password must be at least 6 characters long',
   })
   password!: string;
+
+  @ApiProperty({
+    type: 'string',
+    format: 'binary',
+    description: 'Optional profile photo',
+    required: false,
+  })
+  @IsOptional()
+  photo?: any;
 }

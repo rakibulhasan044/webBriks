@@ -9,9 +9,3 @@ model User {
 
     @@map("users")
 }
-
-enum BoardRole {
-    OWNER
-    EDITOR
-    VIEWER
-}
