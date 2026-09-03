@@ -1,0 +1,14 @@
+model Column {
+    id        String   @id @default(uuid())
+    title     String
+    position  Float // fractional index for ordering — see explanation below
+    boardId   String
+    board     Board    @relation(fields: [boardId], references: [id], onDelete: Cascade)
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    tasks Task[]
+
+    @@index([boardId])
+    @@map("columns")
+}

@@ -130,4 +130,28 @@ export class MinioService implements OnModuleInit {
     const protocol = this.minioConfig.useSSL ? 'https' : 'http';
     return `${protocol}://${this.minioConfig.endpoint}:${this.minioConfig.port}${path}`;
   }
+
+  /**
+   * Deletes a file from MinIO storage
+   * @param fileUrl The relative URL path (e.g. /bucket-name/folder/file.jpg)
+   */
+  async deleteFile(fileUrl: string): Promise<void> {
+    if (!fileUrl) return;
+
+    try {
+      const bucketName = this.minioConfig.defaultBucket;
+      const prefix = `/${bucketName}/`;
+      
+      let objectName = fileUrl;
+      if (fileUrl.startsWith(prefix)) {
+        objectName = fileUrl.substring(prefix.length);
+      }
+
+      await this.minioClient.removeObject(bucketName, objectName);
+      this.logger.log(`Deleted file: ${objectName} from bucket: ${bucketName}`);
+    } catch (error) {
+      this.logger.error(`Failed to delete file from MinIO: ${fileUrl}`, error);
+      // Fail silently to not break database transactions if the file is already gone
+    }
+  }
 }

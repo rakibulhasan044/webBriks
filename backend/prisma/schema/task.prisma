@@ -1,0 +1,16 @@
+model Task {
+    id          String   @id @default(uuid())
+    title       String
+    description String?
+    position    Int // fractional index for ordering within a column
+    columnId    String
+    column      Column   @relation(fields: [columnId], references: [id], onDelete: Cascade)
+    assigneeId  String?
+    assignee    User?    @relation("TaskAssignee", fields: [assigneeId], references: [id])
+    createdAt   DateTime @default(now())
+    updatedAt   DateTime @updatedAt
+
+    @@index([columnId])
+    @@index([assigneeId])
+    @@map("tasks")
+}

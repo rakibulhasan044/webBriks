@@ -1,0 +1,14 @@
+model BoardMember {
+    id        String    @id @default(uuid())
+    boardId   String
+    userId    String
+    role      BoardRole @default(MEMBER)
+    createdAt DateTime  @default(now())
+
+    board Board @relation(fields: [boardId], references: [id], onDelete: Cascade)
+    user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+    @@unique([boardId, userId]) // a user has exactly one role per board
+    @@index([userId])
+    @@map("board_members")
+}

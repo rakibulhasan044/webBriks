@@ -6,6 +6,8 @@ import { ConfigModule } from '@nestjs/config';
 import * as path from 'path';
 import { AuthModule } from './modules/auth/auth.module';
 import { MinioModule } from './modules/minio/minio.module';
+import { BoardModule } from './modules/board/board.module';
+import { BoardMemberModule } from './modules/board-member/board-member.module';
 import appConfig from './config/app.config';
 import { fileConfig, minioConfig } from './config/file.config';
 
@@ -19,6 +21,8 @@ import { fileConfig, minioConfig } from './config/file.config';
     PrismaModule,
     AuthModule,
     MinioModule,
+    BoardModule,
+    BoardMemberModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -9,8 +9,8 @@ import {
   Max,
   Min,
 } from 'class-validator';
-import { AppConfig } from '../types/appConfig.type';
 import validateConfig from './validate.config';
+import { AppConfig } from '../common/types/appConfig.type';
 
 enum Environment {
   Development = 'development',

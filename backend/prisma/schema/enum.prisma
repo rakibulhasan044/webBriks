@@ -1,5 +1,4 @@
 enum BoardRole {
     OWNER
-    EDITOR
-    VIEWER
+    MEMBER
 }

@@ -47,7 +47,7 @@ services:
       - ./backend:/usr/src/app
       # Prevent your Mac's node_modules from overwriting the Linux container's node_modules
       - /usr/src/app/node_modules
-    command: sh -c "npx prisma generate && npx prisma db push && npm run start:dev"
+    command: sh -c "npx prisma generate && npx prisma db push --accept-data-loss && npm run start:dev"
     depends_on:
       - postgres
       - minio
