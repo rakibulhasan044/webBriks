@@ -8,6 +8,8 @@ import { JwtService } from '@nestjs/jwt';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import { ChangePasswordDto } from './dto/change-password.dto';
+import { PaginateParams } from '../../common/decorators/paginate.decorator';
+import { PaginateHelper } from '../../common/helper/paginate.helper';
 import * as bcrypt from 'bcrypt';
 import { MinioService } from '../minio/minio.service';
 
@@ -89,19 +91,38 @@ export class AuthService {
     };
   }
 
-  async getAllUsers() {
-    return this.prismaService.user.findMany({
-      select: {
-        id: true,
-        name: true,
-        email: true,
-        photo: true,
-        createdAt: true,
-      },
-      orderBy: {
-        createdAt: 'desc',
-      },
-    });
+  async getAllUsers(paginateParams: PaginateParams) {
+    const { skip, limit, search, page } = paginateParams;
+
+    const where = search 
+      ? { 
+          OR: [
+            { name: { contains: search, mode: 'insensitive' as const } },
+            { email: { contains: search, mode: 'insensitive' as const } }
+          ]
+        }
+      : {};
+
+    const [users, total] = await Promise.all([
+      this.prismaService.user.findMany({
+        where,
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          photo: true,
+          createdAt: true,
+        },
+        orderBy: {
+          createdAt: 'desc',
+        },
+        skip,
+        take: limit,
+      }),
+      this.prismaService.user.count({ where }),
+    ]);
+
+    return PaginateHelper.response(users, total, { page, limit });
   }
 
   async getMe(userId: string) {

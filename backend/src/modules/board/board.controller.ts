@@ -18,6 +18,10 @@ import { UpdateBoardDto } from './dto/update-board.dto';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { CurrentUserId } from '../../common/decorators/auth.decorator';
 import { ResponseMessage } from '../../common/decorators/response-message.decorator';
+import {
+  Paginate,
+  type PaginateParams,
+} from '../../common/decorators/paginate.decorator';
 
 @ApiTags('Boards')
 @ApiBearerAuth()
@@ -40,8 +44,11 @@ export class BoardController {
 
   @Get()
   @ResponseMessage('Boards retrieved successfully')
-  findAll(@CurrentUserId() userId: string) {
-    return this.boardService.findAll(userId);
+  findAll(
+    @CurrentUserId() userId: string,
+    @Paginate() paginateParams: PaginateParams,
+  ) {
+    return this.boardService.findAll(userId, paginateParams);
   }
 
   @Get(':id')

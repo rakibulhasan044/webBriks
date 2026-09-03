@@ -1,4 +1,15 @@
-import { Controller, Post, Body, HttpCode, HttpStatus, UseInterceptors, UploadedFile, Get, UseGuards, Patch } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  HttpCode,
+  HttpStatus,
+  UseInterceptors,
+  UploadedFile,
+  Get,
+  UseGuards,
+  Patch,
+} from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiConsumes, ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
@@ -9,6 +20,10 @@ import { ChangePasswordDto } from './dto/change-password.dto';
 import { ResponseMessage } from '../../common/decorators/response-message.decorator';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { CurrentUserId } from '../../common/decorators/auth.decorator';
+import {
+  Paginate,
+  type PaginateParams,
+} from '../../common/decorators/paginate.decorator';
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -37,8 +52,8 @@ export class AuthController {
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ResponseMessage('Successfully retrieved all users')
-  async getAllUsers() {
-    return this.authService.getAllUsers();
+  async getAllUsers(@Paginate() paginateParams: PaginateParams) {
+    return this.authService.getAllUsers(paginateParams);
   }
 
   @Get('me')

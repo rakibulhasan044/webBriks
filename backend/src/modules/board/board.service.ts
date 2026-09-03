@@ -8,6 +8,9 @@ import { MinioService } from '../minio/minio.service';
 import { CreateBoardDto } from './dto/create-board.dto';
 import { UpdateBoardDto } from './dto/update-board.dto';
 
+import { PaginateParams } from '../../common/decorators/paginate.decorator';
+import { PaginateHelper } from '../../common/helper/paginate.helper';
+
 @Injectable()
 export class BoardService {
   constructor(
@@ -42,17 +45,32 @@ export class BoardService {
     });
   }
 
-  async findAll(userId: string) {
-    // For now, return boards owned by the user or where they are a member
-    return this.prismaService.board.findMany({
-      where: {
-        OR: [
-          { ownerId: userId },
-          { members: { some: { userId } } }
-        ]
-      },
-      orderBy: { createdAt: 'desc' }
-    });
+  async findAll(userId: string, paginateParams: PaginateParams) {
+    const { skip, limit, search, page } = paginateParams;
+
+    const where = {
+      AND: [
+        {
+          OR: [
+            { ownerId: userId },
+            { members: { some: { userId } } }
+          ]
+        },
+        search ? { title: { contains: search, mode: 'insensitive' as const } } : {}
+      ]
+    };
+
+    const [boards, total] = await Promise.all([
+      this.prismaService.board.findMany({
+        where,
+        orderBy: { createdAt: 'desc' },
+        skip,
+        take: limit,
+      }),
+      this.prismaService.board.count({ where }),
+    ]);
+
+    return PaginateHelper.response(boards, total, { page, limit });
   }
 
   async findOne(id: string, userId: string) {
