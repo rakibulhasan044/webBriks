@@ -9,8 +9,8 @@ import {
   IsNotEmpty,
 } from 'class-validator';
 import validateConfig from './validate.config';
-import { FileConfig, MinioConfig } from '../types/minioConfig.type';
 import { Type } from 'class-transformer';
+import { FileConfig, MinioConfig } from '../common/types/minioConfig.type';
 
 class MinioEnvironmentVariablesValidator {
   @IsString()
