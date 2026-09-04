@@ -1,4 +1,14 @@
-import { Controller, Post, Body, Patch, Param, Delete, UseGuards, UseInterceptors, UploadedFile } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  UseGuards,
+  UseInterceptors,
+  UploadedFile,
+} from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiBearerAuth, ApiTags, ApiConsumes } from '@nestjs/swagger';
 import { TaskService } from './task.service';
@@ -20,7 +30,7 @@ export class TaskController {
   create(
     @Param('columnId') columnId: string,
     @CurrentUserId() userId: string,
-    @Body() dto: CreateTaskDto
+    @Body() dto: CreateTaskDto,
   ) {
     return this.taskService.create(columnId, userId, dto);
   }
@@ -30,17 +40,14 @@ export class TaskController {
   update(
     @Param('id') id: string,
     @CurrentUserId() userId: string,
-    @Body() dto: UpdateTaskDto
+    @Body() dto: UpdateTaskDto,
   ) {
     return this.taskService.update(id, userId, dto);
   }
 
   @Delete('tasks/:id')
   @ResponseMessage('Task deleted successfully')
-  remove(
-    @Param('id') id: string,
-    @CurrentUserId() userId: string
-  ) {
+  remove(@Param('id') id: string, @CurrentUserId() userId: string) {
     return this.taskService.remove(id, userId);
   }
 
@@ -53,7 +60,7 @@ export class TaskController {
   addAttachment(
     @Param('taskId') taskId: string,
     @CurrentUserId() userId: string,
-    @UploadedFile() file: Express.Multer.File
+    @UploadedFile() file: Express.Multer.File,
   ) {
     return this.taskService.addAttachment(taskId, userId, file);
   }
@@ -63,7 +70,7 @@ export class TaskController {
   removeAttachment(
     @Param('taskId') taskId: string,
     @Param('attachmentId') attachmentId: string,
-    @CurrentUserId() userId: string
+    @CurrentUserId() userId: string,
   ) {
     return this.taskService.removeAttachment(taskId, attachmentId, userId);
   }

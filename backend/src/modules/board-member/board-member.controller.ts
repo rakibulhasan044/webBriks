@@ -1,4 +1,12 @@
-import { Controller, Post, Get, Delete, Param, Body, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Get,
+  Delete,
+  Param,
+  Body,
+  UseGuards,
+} from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { BoardMemberService } from './board-member.service';
 import { AddMemberDto } from './dto/add-member.dto';
@@ -39,6 +47,10 @@ export class BoardMemberController {
     @Param('userId') userIdToRemove: string,
     @CurrentUserId() userId: string,
   ) {
-    return this.boardMemberService.removeMember(boardId, userIdToRemove, userId);
+    return this.boardMemberService.removeMember(
+      boardId,
+      userIdToRemove,
+      userId,
+    );
   }
 }

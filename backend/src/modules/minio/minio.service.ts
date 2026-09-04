@@ -141,7 +141,7 @@ export class MinioService implements OnModuleInit {
     try {
       const bucketName = this.minioConfig.defaultBucket;
       const prefix = `/${bucketName}/`;
-      
+
       let objectName = fileUrl;
       if (fileUrl.startsWith(prefix)) {
         objectName = fileUrl.substring(prefix.length);

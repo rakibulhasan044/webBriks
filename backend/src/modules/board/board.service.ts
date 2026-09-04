@@ -18,9 +18,13 @@ export class BoardService {
     private readonly minioService: MinioService,
   ) {}
 
-  async create(userId: string, createBoardDto: CreateBoardDto, coverImage?: Express.Multer.File) {
+  async create(
+    userId: string,
+    createBoardDto: CreateBoardDto,
+    coverImage?: Express.Multer.File,
+  ) {
     let coverImageUrl: string | null = null;
-    
+
     if (coverImage) {
       coverImageUrl = await this.minioService.uploadFile(coverImage, 'boards');
     }
@@ -36,12 +40,12 @@ export class BoardService {
             { title: 'To Do', position: 1000 },
             { title: 'In Progress', position: 2000 },
             { title: 'Done', position: 3000 },
-          ]
-        }
+          ],
+        },
       },
       include: {
-        columns: true
-      }
+        columns: true,
+      },
     });
   }
 
@@ -51,13 +55,12 @@ export class BoardService {
     const where = {
       AND: [
         {
-          OR: [
-            { ownerId: userId },
-            { members: { some: { userId } } }
-          ]
+          OR: [{ ownerId: userId }, { members: { some: { userId } } }],
         },
-        search ? { title: { contains: search, mode: 'insensitive' as const } } : {}
-      ]
+        search
+          ? { title: { contains: search, mode: 'insensitive' as const } }
+          : {},
+      ],
     };
 
     const [boards, total] = await Promise.all([
@@ -78,7 +81,13 @@ export class BoardService {
       where: { id },
       include: {
         owner: { select: { id: true, name: true, email: true, photo: true } },
-        members: { include: { user: { select: { id: true, name: true, email: true, photo: true } } } },
+        members: {
+          include: {
+            user: {
+              select: { id: true, name: true, email: true, photo: true },
+            },
+          },
+        },
         columns: { orderBy: { position: 'asc' } },
       },
     });
@@ -89,7 +98,7 @@ export class BoardService {
 
     // Check if user is owner or member
     const isOwner = board.ownerId === userId;
-    const isMember = board.members.some(m => m.userId === userId);
+    const isMember = board.members.some((m) => m.userId === userId);
 
     if (!isOwner && !isMember) {
       throw new ForbiddenException('You do not have access to this board');
@@ -98,26 +107,33 @@ export class BoardService {
     return board;
   }
 
-  async update(id: string, userId: string, updateBoardDto: UpdateBoardDto, coverImage?: Express.Multer.File) {
+  async update(
+    id: string,
+    userId: string,
+    updateBoardDto: UpdateBoardDto,
+    coverImage?: Express.Multer.File,
+  ) {
     // Verify ownership or membership
-    const board = await this.prismaService.board.findUnique({ 
+    const board = await this.prismaService.board.findUnique({
       where: { id },
-      include: { members: true } 
+      include: { members: true },
     });
-    
+
     if (!board) throw new NotFoundException('Board not found');
-    
+
     const isOwner = board.ownerId === userId;
-    const isMember = board.members.some(m => m.userId === userId);
+    const isMember = board.members.some((m) => m.userId === userId);
 
     if (!isOwner && !isMember) {
-      throw new ForbiddenException('Only the board owner or members can update it');
+      throw new ForbiddenException(
+        'Only the board owner or members can update it',
+      );
     }
 
     let coverImageUrl = board.coverImage;
     if (coverImage) {
       coverImageUrl = await this.minioService.uploadFile(coverImage, 'boards');
-      
+
       // Clean up old image if a new one is uploaded
       if (board.coverImage) {
         await this.minioService.deleteFile(board.coverImage);
@@ -137,7 +153,8 @@ export class BoardService {
   async remove(id: string, userId: string) {
     const board = await this.prismaService.board.findUnique({ where: { id } });
     if (!board) throw new NotFoundException('Board not found');
-    if (board.ownerId !== userId) throw new ForbiddenException('Only the board owner can delete it');
+    if (board.ownerId !== userId)
+      throw new ForbiddenException('Only the board owner can delete it');
 
     // Delete image from MinIO
     if (board.coverImage) {
@@ -145,7 +162,7 @@ export class BoardService {
     }
 
     await this.prismaService.board.delete({ where: { id } });
-    
+
     return { success: true };
   }
 }

@@ -12,6 +12,7 @@ import { ColumnModule } from './modules/column/column.module';
 import { TaskModule } from './modules/task/task.module';
 import appConfig from './config/app.config';
 import { fileConfig, minioConfig } from './config/file.config';
+import { EventEmitterModule } from '@nestjs/event-emitter';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { fileConfig, minioConfig } from './config/file.config';
       load: [appConfig, minioConfig, fileConfig],
       envFilePath: path.resolve(__dirname, '../../.env'),
     }),
+    EventEmitterModule.forRoot(),
     PrismaModule,
     AuthModule,
     MinioModule,

@@ -1,4 +1,13 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  UseGuards,
+} from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { ColumnService } from './column.service';
 import { CreateColumnDto } from './dto/create-column.dto';
@@ -19,17 +28,14 @@ export class ColumnController {
   create(
     @Param('boardId') boardId: string,
     @CurrentUserId() userId: string,
-    @Body() dto: CreateColumnDto
+    @Body() dto: CreateColumnDto,
   ) {
     return this.columnService.create(boardId, userId, dto);
   }
 
   @Get('boards/:boardId/columns')
   @ResponseMessage('Columns retrieved successfully')
-  findAll(
-    @Param('boardId') boardId: string,
-    @CurrentUserId() userId: string
-  ) {
+  findAll(@Param('boardId') boardId: string, @CurrentUserId() userId: string) {
     return this.columnService.findAll(boardId, userId);
   }
 
@@ -38,17 +44,14 @@ export class ColumnController {
   update(
     @Param('id') id: string,
     @CurrentUserId() userId: string,
-    @Body() dto: UpdateColumnDto
+    @Body() dto: UpdateColumnDto,
   ) {
     return this.columnService.update(id, userId, dto);
   }
 
   @Delete('columns/:id')
   @ResponseMessage('Column deleted successfully')
-  remove(
-    @Param('id') id: string,
-    @CurrentUserId() userId: string
-  ) {
+  remove(@Param('id') id: string, @CurrentUserId() userId: string) {
     return this.columnService.remove(id, userId);
   }
 }

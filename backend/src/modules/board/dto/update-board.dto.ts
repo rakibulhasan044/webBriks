@@ -7,7 +7,9 @@ export class UpdateBoardDto {
     example: 'Engineering Project (Updated)',
     required: false,
   })
-  @IsString()
+  @IsString({
+    message: 'Title must be a string',
+  })
   @IsOptional()
   title?: string;
 
@@ -16,7 +18,9 @@ export class UpdateBoardDto {
     example: 'Updated description',
     required: false,
   })
-  @IsString()
+  @IsString({
+    message: 'Description must be a string',
+  })
   @IsOptional()
   description?: string;
 

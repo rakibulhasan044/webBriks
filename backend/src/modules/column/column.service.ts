@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  ForbiddenException,
+} from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { CreateColumnDto } from './dto/create-column.dto';
 import { UpdateColumnDto } from './dto/update-column.dto';
@@ -16,7 +20,7 @@ export class ColumnService {
     if (!board) throw new NotFoundException('Board not found');
 
     const isOwner = board.ownerId === userId;
-    const isMember = board.members.some(m => m.userId === userId);
+    const isMember = board.members.some((m) => m.userId === userId);
 
     if (!isOwner && !isMember) {
       throw new ForbiddenException('You do not have access to this board');
@@ -25,7 +29,9 @@ export class ColumnService {
 
   // Helper to check access via columnId
   private async verifyColumnAccess(columnId: string, userId: string) {
-    const column = await this.prisma.column.findUnique({ where: { id: columnId } });
+    const column = await this.prisma.column.findUnique({
+      where: { id: columnId },
+    });
     if (!column) throw new NotFoundException('Column not found');
     await this.verifyBoardAccess(column.boardId, userId);
     return column;
@@ -53,10 +59,10 @@ export class ColumnService {
         tasks: {
           orderBy: { position: 'asc' },
           include: {
-            assignee: { select: { id: true, name: true, photo: true } }
-          }
-        }
-      }
+            assignee: { select: { id: true, name: true, photo: true } },
+          },
+        },
+      },
     });
   }
 

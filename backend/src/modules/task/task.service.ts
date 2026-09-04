@@ -9,12 +9,14 @@ import { CreateTaskDto } from './dto/create-task.dto';
 import { UpdateTaskDto } from './dto/update-task.dto';
 
 import { MinioService } from '../minio/minio.service';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 
 @Injectable()
 export class TaskService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly minioService: MinioService,
+    private readonly eventEmitter: EventEmitter2,
   ) {}
 
   // Helper to check access via columnId
@@ -57,7 +59,7 @@ export class TaskService {
       }
     }
 
-    return this.prisma.task.create({
+    const newTask = await this.prisma.task.create({
       data: {
         title: dto.title,
         description: dto.description,
@@ -66,20 +68,28 @@ export class TaskService {
         columnId,
       },
       include: {
-        assignee: { select: { id: true, name: true, photo: true } },
-      },
+        assignee: { select: { id: true, name: true, photo: true } }
+      }
     });
+
+    this.eventEmitter.emit('task.created', { boardId: column.boardId, task: newTask });
+    return newTask;
   }
 
   async update(id: string, userId: string, dto: UpdateTaskDto) {
     const task = await this.verifyTaskAccess(id, userId);
 
+    let boardId = '';
     // If changing column, verify access to the new column
     if (dto.columnId && dto.columnId !== task.columnId) {
-      await this.verifyColumnAccess(dto.columnId, userId);
+      const newColumn = await this.verifyColumnAccess(dto.columnId, userId);
+      boardId = newColumn.boardId;
+    } else {
+      const column = await this.prisma.column.findUnique({ where: { id: task.columnId } });
+      boardId = column!.boardId;
     }
 
-    return this.prisma.task.update({
+    const updatedTask = await this.prisma.task.update({
       where: { id },
       data: {
         title: dto.title,
@@ -89,15 +99,24 @@ export class TaskService {
         assigneeId: dto.assigneeId,
       },
       include: {
-        assignee: { select: { id: true, name: true, photo: true } },
-      },
+        assignee: { select: { id: true, name: true, photo: true } }
+      }
     });
+
+    this.eventEmitter.emit('task.updated', { boardId, task: updatedTask });
+    return updatedTask;
   }
 
   async remove(id: string, userId: string) {
-    await this.verifyTaskAccess(id, userId);
+    const task = await this.verifyTaskAccess(id, userId);
+    const column = await this.prisma.column.findUnique({ where: { id: task.columnId } });
 
     await this.prisma.task.delete({ where: { id } });
+
+    if (column) {
+      this.eventEmitter.emit('task.deleted', { boardId: column.boardId, taskId: id });
+    }
+    
     return { success: true };
   }
 
