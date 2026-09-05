@@ -18,17 +18,45 @@ import { Label } from "@/components/ui/label";
 import { ImageIcon, Loader2, X } from "lucide-react";
 import { boardService } from "@/services/board.service";
 import { toast } from "sonner";
+import { revalidateBoardsPage } from "@/app/(dashboardlayout)/dashboard/boards/_actions";
+import { z } from "zod";
+
+// 1. Define the Zod Schema
+const createBoardSchema = z.object({
+  title: z
+    .string()
+    .min(3, "Title must be at least 3 characters long")
+    .max(50, "Title cannot exceed 50 characters"),
+  description: z
+    .string()
+    .max(500, "Description cannot exceed 500 characters")
+    .optional(),
+  // For file validation we typically handle it manually since Zod with FormData files can be tricky
+});
+
+// Type for our form errors
+type FormErrors = {
+  title?: string[];
+  description?: string[];
+};
 
 export function CreateBoardModal({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [errors, setErrors] = useState<FormErrors>({}); // 2. State for errors
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      // Optional: Add manual file size validation here (e.g., max 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        toast.error("Image must be smaller than 5MB");
+        if (fileInputRef.current) fileInputRef.current.value = "";
+        return;
+      }
       const url = URL.createObjectURL(file);
       setPreviewUrl(url);
     }
@@ -45,17 +73,32 @@ export function CreateBoardModal({ children }: { children: React.ReactNode }) {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsLoading(true);
+    setErrors({}); // clear previous errors
 
     try {
       const formData = new FormData(e.currentTarget);
       
+      // 3. Extract and Validate with Zod
+      const title = formData.get("title") as string;
+      const description = formData.get("description") as string;
+
+      const validationResult = createBoardSchema.safeParse({ title, description });
+
+      if (!validationResult.success) {
+        // Zod validation failed! Format errors and display them.
+        setErrors(validationResult.error.flatten().fieldErrors);
+        setIsLoading(false);
+        return; // stop execution
+      }
+      
+      // If validation passed, send the original FormData to the backend
       const res = await boardService.createBoard(formData);
       
       if (res.success) {
         toast.success("Board created successfully!");
         setIsOpen(false);
         setPreviewUrl(null);
-        router.refresh(); // Refresh the server component to load the new board!
+        await revalidateBoardsPage(); // Clear Next.js server cache!
       } else {
         toast.error(res.message || "Failed to create board");
       }
@@ -70,13 +113,16 @@ export function CreateBoardModal({ children }: { children: React.ReactNode }) {
   const handleOpenChange = (open: boolean) => {
     setIsOpen(open);
     if (!open) {
-      setTimeout(() => setPreviewUrl(null), 300);
+      setTimeout(() => {
+        setPreviewUrl(null);
+        setErrors({});
+      }, 300);
     }
   };
 
   return (
     <Dialog open={isOpen} onOpenChange={handleOpenChange}>
-      <DialogTrigger render={children as any} />
+      <DialogTrigger asChild render={children as any} />
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>Create New Board</DialogTitle>
@@ -87,25 +133,45 @@ export function CreateBoardModal({ children }: { children: React.ReactNode }) {
         
         <form onSubmit={handleSubmit}>
           <div className="grid gap-5 py-4">
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="title" className="text-right text-sm font-medium">
+            {/* TITLE INPUT */}
+            <div className="grid grid-cols-4 items-start gap-4">
+              <Label htmlFor="title" className="text-right text-sm font-medium pt-2">
                 Title <span className="text-red-500">*</span>
               </Label>
-              <Input id="title" name="title" placeholder="e.g. Marketing Campaign" className="col-span-3" required />
+              <div className="col-span-3">
+                <Input 
+                  id="title" 
+                  name="title" 
+                  placeholder="e.g. Marketing Campaign" 
+                  className={errors.title ? "border-red-500 focus-visible:ring-red-500" : ""}
+                />
+                {errors.title && (
+                  <p className="text-xs text-red-500 mt-1.5 font-medium">{errors.title[0]}</p>
+                )}
+              </div>
             </div>
             
+            {/* DESCRIPTION INPUT */}
             <div className="grid grid-cols-4 items-start gap-4">
               <Label htmlFor="description" className="text-right text-sm font-medium pt-2">
                 Description
               </Label>
-              <textarea 
-                id="description" 
-                name="description"
-                placeholder="Add some details about this board..." 
-                className="col-span-3 flex min-h-[80px] w-full rounded-md border border-slate-200 bg-transparent px-3 py-2 text-sm shadow-sm placeholder:text-slate-500 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-slate-950 disabled:cursor-not-allowed disabled:opacity-50"
-              />
+              <div className="col-span-3">
+                <textarea 
+                  id="description" 
+                  name="description"
+                  placeholder="Add some details about this board..." 
+                  className={`flex min-h-[80px] w-full rounded-md border bg-transparent px-3 py-2 text-sm shadow-sm placeholder:text-slate-500 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-slate-950 disabled:cursor-not-allowed disabled:opacity-50 ${
+                    errors.description ? "border-red-500 focus-visible:ring-red-500" : "border-slate-200"
+                  }`}
+                />
+                {errors.description && (
+                  <p className="text-xs text-red-500 mt-1.5 font-medium">{errors.description[0]}</p>
+                )}
+              </div>
             </div>
             
+            {/* COVER IMAGE INPUT */}
             <div className="grid grid-cols-4 items-start gap-4">
               <Label htmlFor="coverImage" className="text-right text-sm font-medium pt-2">
                 Cover Image

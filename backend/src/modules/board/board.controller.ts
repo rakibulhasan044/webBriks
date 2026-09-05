@@ -15,6 +15,7 @@ import { ApiBearerAuth, ApiConsumes, ApiTags } from '@nestjs/swagger';
 import { BoardService } from './board.service';
 import { CreateBoardDto } from './dto/create-board.dto';
 import { UpdateBoardDto } from './dto/update-board.dto';
+import { AddMemberDto } from './dto/add-member.dto';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { CurrentUserId } from '../../common/decorators/auth.decorator';
 import { ResponseMessage } from '../../common/decorators/response-message.decorator';
@@ -74,5 +75,15 @@ export class BoardController {
   @ResponseMessage('Board deleted successfully')
   remove(@Param('id') id: string, @CurrentUserId() userId: string) {
     return this.boardService.remove(id, userId);
+  }
+
+  @Post(':id/members')
+  @ResponseMessage('Member added successfully')
+  addMember(
+    @Param('id') id: string,
+    @CurrentUserId() userId: string,
+    @Body() dto: AddMemberDto,
+  ) {
+    return this.boardService.addMember(id, userId, dto.email);
   }
 }

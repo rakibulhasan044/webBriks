@@ -2,6 +2,7 @@ import {
   Injectable,
   NotFoundException,
   ForbiddenException,
+  BadRequestException,
 } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { MinioService } from '../minio/minio.service';
@@ -92,17 +93,19 @@ export class BoardService {
             },
           },
         },
-        columns: { 
+        columns: {
           orderBy: { position: 'asc' },
           include: {
             tasks: {
               orderBy: { position: 'asc' },
               include: {
-                assignee: { select: { id: true, name: true, email: true, photo: true } },
+                assignee: {
+                  select: { id: true, name: true, email: true, photo: true },
+                },
                 attachments: true,
-              }
-            }
-          }
+              },
+            },
+          },
         },
       },
     });
@@ -179,5 +182,53 @@ export class BoardService {
     await this.prismaService.board.delete({ where: { id } });
 
     return { success: true };
+  }
+
+  async addMember(boardId: string, currentUserId: string, email: string) {
+    // Check if board exists and user is owner
+    const board = await this.prismaService.board.findUnique({
+      where: { id: boardId },
+      include: { members: true },
+    });
+
+    if (!board) throw new NotFoundException('Board not found');
+    if (board.ownerId !== currentUserId) {
+      throw new ForbiddenException('Only the board owner can add members');
+    }
+
+    // Find the user to add
+    const userToAdd = await this.prismaService.user.findUnique({
+      where: { email },
+    });
+
+    if (!userToAdd)
+      throw new NotFoundException('User with this email not found');
+
+    if (userToAdd.id === currentUserId) {
+      throw new BadRequestException('You are already the owner of this board');
+    }
+
+    // Check if already a member
+    const isAlreadyMember = board.members.some(
+      (m) => m.userId === userToAdd.id,
+    );
+    if (isAlreadyMember) {
+      throw new BadRequestException('User is already a member of this board');
+    }
+
+    // Add member
+    const newMember = await this.prismaService.boardMember.create({
+      data: {
+        boardId,
+        userId: userToAdd.id,
+      },
+      include: {
+        user: {
+          select: { id: true, name: true, email: true, photo: true },
+        },
+      },
+    });
+
+    return newMember;
   }
 }

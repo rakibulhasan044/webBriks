@@ -55,13 +55,30 @@ export class TaskController {
 
   @Post('tasks/:taskId/attachments')
   @ApiConsumes('multipart/form-data')
-  @UseInterceptors(FileInterceptor('file'))
+  @UseInterceptors(FileInterceptor('file', {
+    fileFilter: (req, file, cb) => {
+      const allowedMimeTypes = [
+        'image/jpeg', 'image/png', 'image/gif', 'image/webp',
+        'application/pdf', 
+        'application/msword', 
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        'application/vnd.ms-powerpoint',
+        'application/vnd.openxmlformats-officedocument.presentationml.presentation'
+      ];
+      if (allowedMimeTypes.includes(file.mimetype)) {
+        cb(null, true);
+      } else {
+        cb(new Error('Invalid file type. Only images, PDF, DOC, and PPT are allowed.'), false);
+      }
+    }
+  }))
   @ResponseMessage('Attachment added successfully')
   addAttachment(
     @Param('taskId') taskId: string,
     @CurrentUserId() userId: string,
     @UploadedFile() file: Express.Multer.File,
   ) {
+    if (!file) throw new Error('File is required or file type is invalid');
     return this.taskService.addAttachment(taskId, userId, file);
   }
 

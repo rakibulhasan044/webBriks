@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -14,42 +14,104 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { UserPlus } from "lucide-react";
+import { UserPlus, Loader2 } from "lucide-react";
+import { boardService } from "@/services/board.service";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
+import { z } from "zod";
 
-export function AddMemberModal({ children }: { children: React.ReactNode }) {
+const addMemberSchema = z.object({
+  email: z.string().email("Please enter a valid email address"),
+});
+
+type FormErrors = {
+  email?: string[];
+};
+
+export function AddMemberModal({ children, boardId }: { children: React.ReactNode, boardId?: string }) {
+  const [isOpen, setIsOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [errors, setErrors] = useState<FormErrors>({});
+  const router = useRouter();
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setErrors({});
+    if (!boardId) return;
+
+    const formData = new FormData(e.currentTarget);
+    const data = {
+      email: formData.get("email") as string,
+    };
+
+    const result = addMemberSchema.safeParse(data);
+
+    if (!result.success) {
+      const fieldErrors = result.error.flatten().fieldErrors;
+      setErrors(fieldErrors);
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const res = await boardService.addMember(boardId, result.data.email);
+      if (res.success) {
+        toast.success("Member added successfully!");
+        setIsOpen(false);
+        router.refresh();
+      } else {
+        toast.error(res.message || "Failed to add member");
+      }
+    } catch (error: any) {
+      toast.error(error.message || "An unexpected error occurred");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
-    <Dialog>
-      <DialogTrigger render={children as any} />
+    <Dialog open={isOpen} onOpenChange={(open) => {
+      setIsOpen(open);
+      if (!open) setErrors({});
+    }}>
+      <DialogTrigger asChild render={children as any} />
       <DialogContent className="sm:max-w-[400px]">
         <DialogHeader>
-          <DialogTitle>Invite a Member</DialogTitle>
+          <DialogTitle>Add a Member</DialogTitle>
           <DialogDescription>
-            Enter the email address of the person you want to invite to this board.
+            Instantly add a user to this board using their email address. They must already have an account.
           </DialogDescription>
         </DialogHeader>
         
-        <div className="grid gap-4 py-4">
-          <div className="grid gap-2">
-            <Label htmlFor="email" className="font-medium text-sm">
-              Email Address
+        <form onSubmit={handleSubmit} className="py-4">
+          <div className="flex flex-col gap-3">
+            <Label htmlFor="email" className="text-sm font-medium">
+              User Email <span className="text-red-500">*</span>
             </Label>
             <Input 
               id="email" 
-              name="email" 
+              name="email"
               type="email" 
-              placeholder="e.g. colleague@example.com" 
-              required 
+              placeholder="e.g. teammate@company.com" 
+              disabled={isLoading}
             />
+            {errors.email && (
+              <p className="text-sm text-red-500 font-medium">{errors.email[0]}</p>
+            )}
           </div>
-        </div>
-        
-        <DialogFooter>
-          <DialogClose render={<Button type="button" variant="outline">Cancel</Button>} />
-          <Button type="submit" className="bg-indigo-600 hover:bg-indigo-700 text-white gap-2">
-            <UserPlus className="w-4 h-4" />
-            Send Invite
-          </Button>
-        </DialogFooter>
+          
+          <DialogFooter className="mt-6">
+            <DialogClose render={<Button type="button" variant="outline" disabled={isLoading}>Cancel</Button>} />
+            <Button type="submit" className="bg-indigo-600 hover:bg-indigo-700 text-white" disabled={isLoading}>
+              {isLoading ? (
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+              ) : (
+                <UserPlus className="w-4 h-4 mr-2" />
+              )}
+              Add Member
+            </Button>
+          </DialogFooter>
+        </form>
       </DialogContent>
     </Dialog>
   );

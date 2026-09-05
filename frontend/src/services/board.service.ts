@@ -31,5 +31,21 @@ export const boardService = {
         "Content-Type": "multipart/form-data",
       },
     });
-  }
+  },
+
+  updateBoard: async (id: string, formData: FormData) => {
+    return httpClient.patch<IBoard>(`/boards/${id}`, formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
+  },
+
+  deleteBoard: async (id: string) => {
+    return httpClient.delete(`/boards/${id}`);
+  },
+
+  addMember: async (boardId: string, email: string) => {
+    return httpClient.post(`/boards/${boardId}/members`, { email });
+  },
 };

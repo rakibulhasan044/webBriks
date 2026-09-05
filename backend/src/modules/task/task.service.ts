@@ -59,11 +59,22 @@ export class TaskService {
       }
     }
 
+    // Auto-calculate position if not provided (place at bottom)
+    let position = dto.position;
+    if (position === undefined) {
+      const lastTask = await this.prisma.task.findFirst({
+        where: { columnId },
+        orderBy: { position: 'desc' },
+      });
+      position = lastTask ? lastTask.position + 1000 : 1000;
+    }
+
     const newTask = await this.prisma.task.create({
       data: {
         title: dto.title,
         description: dto.description,
-        position: dto.position,
+        priority: dto.priority || 'MEDIUM',
+        position,
         assigneeId: dto.assigneeId,
         columnId,
       },
