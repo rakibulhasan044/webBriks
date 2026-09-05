@@ -1,48 +1,15 @@
-"use client";
+const fs = require('fs');
+const file = 'frontend/src/components/modules/Dashboard/topbar.tsx';
+let content = fs.readFileSync(file, 'utf8');
 
-import { Search, Home, LogOut, User, Menu, ChevronDown } from "lucide-react";
-import Link from "next/link";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuGroup,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { IUser } from "@/types/user.type";
+// Add ChevronDown to imports
+content = content.replace(
+  'import { Search, Home, LogOut, User, Menu } from "lucide-react";',
+  'import { Search, Home, LogOut, User, Menu, ChevronDown } from "lucide-react";'
+);
 
-export function Topbar({ user }: { user?: IUser }) {
-  
-  const handleLogout = () => {
-    document.cookie = "accessToken=; path=/; max-age=0";
-    document.cookie = "refreshToken=; path=/; max-age=0";
-    document.cookie = "currentUser=; path=/; max-age=0";
-    window.location.href = "/login";
-  };
-
-  return (
-    <header className="h-16 flex items-center justify-between px-6 bg-white border-b border-slate-200 z-10">
-      {/* Left: Mobile Menu Toggle & Search Bar */}
-      <div className="flex items-center gap-4 flex-1">
-        <button className="md:hidden p-2 text-slate-500 hover:bg-slate-100 rounded-lg">
-          <Menu className="w-5 h-5" />
-        </button>
-
-        <div className="relative w-full max-w-md hidden sm:block">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-          <input
-            type="text"
-            placeholder="Search boards, tasks..."
-            className="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all"
-          />
-        </div>
-      </div>
-
-      {/* Right: User Avatar & Dropdown (Using Shadcn) */}
-      <div className="flex items-center gap-4">
+// Replace DropdownMenu block
+const triggerReplacement = `
         <DropdownMenu>
           <DropdownMenuTrigger className="flex items-center gap-3 focus:outline-none rounded-xl p-1.5 pr-3 hover:bg-slate-50 hover:shadow-sm transition-all duration-200 border border-transparent hover:border-slate-200/80 group">
             <Avatar className="h-9 w-9 border-2 border-white shadow-sm ring-1 ring-slate-100 transition-transform group-hover:scale-105">
@@ -125,7 +92,13 @@ export function Topbar({ user }: { user?: IUser }) {
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
-      </div>
-    </header>
-  );
+`;
+
+const match = content.match(/<DropdownMenu>[\s\S]*?<\/DropdownMenu>/);
+if (match) {
+  content = content.replace(match[0], triggerReplacement.trim());
+  fs.writeFileSync(file, content);
+  console.log("Successfully updated topbar.tsx!");
+} else {
+  console.error("Could not find DropdownMenu block in topbar.tsx");
 }

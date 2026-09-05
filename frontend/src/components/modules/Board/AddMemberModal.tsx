@@ -18,11 +18,7 @@ import { UserPlus, Loader2 } from "lucide-react";
 import { boardService } from "@/services/board.service";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
-import { z } from "zod";
-
-const addMemberSchema = z.object({
-  email: z.string().email("Please enter a valid email address"),
-});
+import { addMemberSchema } from "@/zod/board.validation";
 
 type FormErrors = {
   email?: string[];

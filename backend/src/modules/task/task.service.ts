@@ -49,9 +49,10 @@ export class TaskService {
     
     const isOwner = column.board.ownerId === userId;
     const isAssigned = task.assignees.some(a => a.id === userId);
+    const isCreator = task.creatorId === userId;
     
-    if (!isOwner && !isAssigned) {
-      throw new ForbiddenException('You can only access tasks you are assigned to');
+    if (!isOwner && !isAssigned && !isCreator) {
+      throw new ForbiddenException('You can only access tasks you are assigned to or created');
     }
     
     return task;
@@ -244,8 +245,10 @@ export class TaskService {
       throw new NotFoundException('Attachment not found');
     }
 
-    await this.minioService.deleteFile(attachment.url);
-    await this.prisma.taskAttachment.delete({ where: { id: attachmentId } });
+    await this.prisma.$transaction(async (tx) => {
+      await tx.taskAttachment.delete({ where: { id: attachmentId } });
+      await this.minioService.deleteFile(attachment.url);
+    });
 
     return { success: true };
   }

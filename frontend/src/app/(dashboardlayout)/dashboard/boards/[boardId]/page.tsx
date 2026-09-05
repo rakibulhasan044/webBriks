@@ -88,45 +88,56 @@ export default async function BoardsPage({ params }: { params: Promise<{ boardId
 
   const totalMembers = 1 + (board.members?.length || 0);
 
-  return (
+return (
     <div className="flex flex-col h-[calc(100vh-4rem)] bg-slate-50/50 -m-6 md:-m-8">
-      {/* Board Header (Server Component area) */}
-      <div className="flex-none px-6 py-4 md:px-8 md:py-6 border-b border-slate-200 bg-white shadow-sm z-10 relative">
+      {/* Board Header */}
+      <div className="flex-none px-6 py-5 md:px-8 md:py-6 bg-white/80 backdrop-blur-xl border-b border-slate-200/60 shadow-[0_1px_3px_rgba(0,0,0,0.04)] z-10 relative">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 relative z-10">
-          <div className="flex flex-col gap-1">
-            <h1 className="text-2xl font-bold text-slate-900 tracking-tight">{board.title}</h1>
-            <div className="flex items-center gap-3">
+          <div className="flex flex-col gap-2">
+            <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight">{board.title}</h1>
+            <div className="flex items-center gap-3.5">
               <div className="flex items-center -space-x-2">
                 {/* Owner */}
-                <Avatar className="h-8 w-8 border-2 border-white shadow-sm">
+                <Avatar className="h-8 w-8 border-2 border-white shadow-sm ring-1 ring-indigo-200">
                   {board.owner?.photo && <AvatarImage src={getImageUrl(board.owner.photo) as string} />}
-                  <AvatarFallback className="bg-indigo-100 text-indigo-700 text-xs">
+                  <AvatarFallback className="bg-indigo-50 text-indigo-700 text-[11px] font-bold">
                     {board.owner?.name?.charAt(0) || "O"}
                   </AvatarFallback>
                 </Avatar>
                 
-                {/* Members */}
-                {board.members?.slice(0, 3).map((member: any) => (
-                  <Avatar key={member.id} className="h-8 w-8 border-2 border-white shadow-sm">
-                    {member.user?.photo && <AvatarImage src={getImageUrl(member.user.photo) as string} />}
-                    <AvatarFallback className="bg-emerald-100 text-emerald-700 text-xs">
-                      {member.user?.name?.charAt(0) || "M"}
-                    </AvatarFallback>
-                  </Avatar>
-                ))}
+                {/* Members with cycling pastel colors */}
+                {board.members?.slice(0, 3).map((member: any, mIdx: number) => {
+                  const memberThemes = [
+                    { bg: "bg-emerald-50", text: "text-emerald-700", ring: "ring-emerald-200" },
+                    { bg: "bg-amber-50", text: "text-amber-700", ring: "ring-amber-200" },
+                    { bg: "bg-sky-50", text: "text-sky-700", ring: "ring-sky-200" },
+                    { bg: "bg-rose-50", text: "text-rose-700", ring: "ring-rose-200" },
+                    { bg: "bg-violet-50", text: "text-violet-700", ring: "ring-violet-200" },
+                  ];
+                  const mt = memberThemes[mIdx % memberThemes.length];
+                  return (
+                    <Avatar key={member.id} className={`h-8 w-8 border-2 border-white shadow-sm ring-1 ${mt.ring}`}>
+                      {member.user?.photo && <AvatarImage src={getImageUrl(member.user.photo) as string} />}
+                      <AvatarFallback className={`${mt.bg} ${mt.text} text-[11px] font-bold`}>
+                        {member.user?.name?.charAt(0) || "M"}
+                      </AvatarFallback>
+                    </Avatar>
+                  );
+                })}
                 
                 {/* Overflow count */}
                 {board.members?.length > 3 && (
-                  <button className="h-8 w-8 rounded-full bg-slate-100 border-2 border-white flex items-center justify-center text-slate-500 hover:bg-slate-200 transition-colors z-10 text-xs font-medium">
+                  <button className="h-8 w-8 rounded-full bg-slate-50 border-2 border-white flex items-center justify-center text-slate-500 hover:bg-slate-100 hover:text-slate-700 transition-all z-10 text-[11px] font-bold shadow-sm ring-1 ring-slate-100">
                     +{board.members.length - 3}
                   </button>
                 )}
               </div>
+              
               <div className="flex items-center gap-3">
-                <span className="text-sm font-medium text-slate-500">{totalMembers} members</span>
-                <div className="w-px h-4 bg-slate-200"></div>
+                <span className="text-[13px] font-semibold text-slate-500">{totalMembers} members</span>
+                <div className="w-px h-4 bg-slate-200" />
                 <AddMemberModal boardId={board.id}>
-                  <button className="flex items-center gap-1.5 text-xs font-semibold text-indigo-600 hover:text-indigo-700 hover:bg-indigo-50 px-2 py-1 rounded-md transition-colors">
+                  <button className="flex items-center gap-1.5 text-[12px] font-bold text-indigo-600 hover:text-indigo-700 bg-indigo-50/60 hover:bg-indigo-100 px-3 py-1.5 rounded-lg transition-all">
                     <UserPlus className="w-3.5 h-3.5" />
                     Invite
                   </button>
@@ -135,14 +146,14 @@ export default async function BoardsPage({ params }: { params: Promise<{ boardId
             </div>
           </div>
           
-          <div className="flex items-center gap-3">
-            <button className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-slate-600 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors">
-              <Filter className="w-4 h-4" />
+          <div className="flex items-center gap-2.5">
+            <button className="flex items-center gap-2 px-3.5 py-2 text-[13px] font-semibold text-slate-600 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 hover:border-slate-300 hover:shadow-sm transition-all">
+              <Filter className="w-3.5 h-3.5" />
               Filter
             </button>
             <CreateColumnModal boardId={board.id}>
-              <button className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-slate-600 bg-white border border-slate-200 rounded-lg shadow-sm hover:bg-slate-50 transition-colors">
-                <Layout className="w-4 h-4" />
+              <button className="flex items-center gap-2 px-3.5 py-2 text-[13px] font-semibold text-slate-600 bg-white border border-slate-200 rounded-xl shadow-sm hover:bg-slate-50 hover:border-slate-300 hover:shadow-md transition-all">
+                <Layout className="w-3.5 h-3.5" />
                 Add Column
               </button>
             </CreateColumnModal>
@@ -150,7 +161,7 @@ export default async function BoardsPage({ params }: { params: Promise<{ boardId
               columns={board.columns.map((c: any) => ({ id: c.id, title: c.title }))} 
               members={[board.owner, ...board.members.map((m: any) => m.user)].map(u => ({ id: u.id, name: u.name, photo: u.photo }))}
             >
-              <button className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-white bg-indigo-600 rounded-lg shadow-sm hover:bg-indigo-700 transition-colors">
+              <button className="flex items-center gap-2 px-4 py-2 text-[13px] font-bold text-white bg-indigo-600 rounded-xl shadow-lg shadow-indigo-200/40 hover:bg-indigo-700 hover:shadow-indigo-300/50 hover:-translate-y-0.5 transition-all duration-200">
                 <Plus className="w-4 h-4" />
                 New Task
               </button>

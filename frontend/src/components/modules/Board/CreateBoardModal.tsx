@@ -19,20 +19,7 @@ import { ImageIcon, Loader2, X } from "lucide-react";
 import { boardService } from "@/services/board.service";
 import { toast } from "sonner";
 import { revalidateBoardsPage } from "@/app/(dashboardlayout)/dashboard/boards/_actions";
-import { z } from "zod";
-
-// 1. Define the Zod Schema
-const createBoardSchema = z.object({
-  title: z
-    .string()
-    .min(3, "Title must be at least 3 characters long")
-    .max(50, "Title cannot exceed 50 characters"),
-  description: z
-    .string()
-    .max(500, "Description cannot exceed 500 characters")
-    .optional(),
-  // For file validation we typically handle it manually since Zod with FormData files can be tricky
-});
+import { createBoardSchema } from "@/zod/board.validation";
 
 // Type for our form errors
 type FormErrors = {

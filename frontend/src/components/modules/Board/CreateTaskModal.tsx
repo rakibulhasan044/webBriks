@@ -18,15 +18,7 @@ import { taskService } from "@/services/task.service";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { Loader2, Paperclip, X } from "lucide-react";
-import { z } from "zod";
-
-const createTaskSchema = z.object({
-  title: z.string().min(1, "Title is required").max(100, "Title is too long"),
-  description: z.string().max(1000, "Description is too long").optional(),
-  priority: z.enum(["LOW", "MEDIUM", "HIGH"]),
-  assigneeIds: z.array(z.string()).optional(),
-  selectedColumnId: z.string().min(1, "Column is required"),
-});
+import { createTaskSchema } from "@/zod/task.validation";
 
 type FormErrors = {
   title?: string[];
@@ -156,7 +148,8 @@ export function CreateTaskModal({ children, columnId, columns = [], members = []
       }
     }}>
       <DialogTrigger render={children as any} />
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-[425px] overflow-hidden no-scrollbar">
+        <div className="w-full flex flex-col gap-4 min-w-0 overflow-x-hidden no-scrollbar">
         <DialogHeader>
           <DialogTitle>Create New Task</DialogTitle>
           <DialogDescription>
@@ -164,8 +157,8 @@ export function CreateTaskModal({ children, columnId, columns = [], members = []
           </DialogDescription>
         </DialogHeader>
         
-        <form onSubmit={handleSubmit} className="py-2">
-          <div className="flex flex-col gap-4">
+        <form onSubmit={handleSubmit} className="py-2 w-full min-w-0 overflow-x-hidden no-scrollbar">
+          <div className="flex flex-col gap-4 w-full min-w-0">
             
             <div className="flex flex-col gap-2">
               <Label htmlFor="title" className="text-sm font-medium">Title <span className="text-red-500">*</span></Label>
@@ -232,7 +225,7 @@ export function CreateTaskModal({ children, columnId, columns = [], members = []
             {members.length > 0 && (
               <div className="flex flex-col gap-2 mt-1">
                 <Label className="text-sm font-medium">Assignees</Label>
-                <div className="flex flex-col gap-1.5 max-h-32 overflow-y-auto p-2 border border-slate-200 rounded-md bg-white/50">
+                <div className="flex flex-col gap-1.5 max-h-32 overflow-y-auto no-scrollbar p-2 border border-slate-200 rounded-md bg-white/50">
                   {members.map(m => (
                     <label key={m.id} className="flex items-center gap-2 cursor-pointer p-1 rounded hover:bg-slate-100 transition-colors">
                       <input 
@@ -251,7 +244,7 @@ export function CreateTaskModal({ children, columnId, columns = [], members = []
             )}
 
             {/* Attachment Upload */}
-            <div className="flex flex-col gap-2 mt-1">
+            <div className="flex flex-col gap-2 mt-1 w-full min-w-0">
               <Label className="text-sm font-medium">Attachment (Optional)</Label>
               <input 
                 type="file"
@@ -273,16 +266,16 @@ export function CreateTaskModal({ children, columnId, columns = [], members = []
                   Attach a file
                 </button>
               ) : (
-                <div className="flex items-center justify-between p-2 border border-slate-200 rounded-md bg-white shadow-sm">
-                  <div className="flex items-center gap-2 overflow-hidden">
+                <div className="flex items-center justify-between p-2 border border-slate-200 rounded-md bg-white shadow-sm min-w-0">
+                  <div className="flex items-center gap-2 overflow-hidden min-w-0 flex-1">
                     <Paperclip className="w-4 h-4 text-indigo-500 flex-shrink-0" />
-                    <span className="text-xs font-medium text-slate-700 truncate">{attachment.name}</span>
+                    <span className="text-xs font-medium text-slate-700 truncate min-w-0">{attachment.name}</span>
                   </div>
                   <button
                     type="button"
                     onClick={removeAttachment}
                     disabled={isLoading}
-                    className="p-1 hover:bg-slate-100 rounded text-slate-400 hover:text-red-500 transition-colors"
+                    className="p-1 hover:bg-slate-100 rounded text-slate-400 hover:text-red-500 transition-colors flex-shrink-0"
                   >
                     <X className="w-4 h-4" />
                   </button>
@@ -299,6 +292,7 @@ export function CreateTaskModal({ children, columnId, columns = [], members = []
             </Button>
           </DialogFooter>
         </form>
+        </div>
       </DialogContent>
     </Dialog>
   );

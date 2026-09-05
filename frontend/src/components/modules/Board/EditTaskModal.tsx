@@ -7,7 +7,6 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
   DialogFooter,
   DialogClose,
 } from "@/components/ui/dialog";
@@ -18,15 +17,7 @@ import { taskService } from "@/services/task.service";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { Loader2, Paperclip, X } from "lucide-react";
-import { z } from "zod";
-
-const editTaskSchema = z.object({
-  title: z.string().min(1, "Title is required").max(100, "Title is too long"),
-  description: z.string().max(1000, "Description is too long").optional(),
-  priority: z.enum(["LOW", "MEDIUM", "HIGH"]),
-  assigneeIds: z.array(z.string()).optional(),
-  selectedColumnId: z.string().min(1, "Column is required"),
-});
+import { editTaskSchema } from "@/zod/task.validation";
 
 type FormErrors = {
   title?: string[];
@@ -37,24 +28,39 @@ type FormErrors = {
 };
 
 interface EditTaskModalProps {
-  children: React.ReactNode;
   task: any; 
   columns?: { id: string; title: string }[];
   members?: { id: string; name: string; photo?: string }[];
+  isOpen: boolean;
+  onClose: () => void;
 }
 
-export function EditTaskModal({ children, task, columns = [], members = [] }: EditTaskModalProps) {
-  const [isOpen, setIsOpen] = useState(false);
+export function EditTaskModal({ task, columns = [], members = [], isOpen, onClose }: EditTaskModalProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState<FormErrors>({});
   const [attachment, setAttachment] = useState<File | null>(null);
   
-  // Set initial selected assignees from task data
-  const [selectedAssignees, setSelectedAssignees] = useState<string[]>(
-    task?.assignees?.map((a: any) => a.id) || []
-  );
+  // Set initial state from task data
+  const [selectedAssignees, setSelectedAssignees] = useState<string[]>([]);
+  const [priority, setPriority] = useState<string>(task?.priority || "MEDIUM");
+  const [columnId, setColumnId] = useState<string>(task?.columnId || "");
+  const [existingAttachments, setExistingAttachments] = useState<any[]>(task?.attachments || []);
+  const [attachmentsToDelete, setAttachmentsToDelete] = useState<string[]>([]);
+  const [deletingAttachmentId, setDeletingAttachmentId] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
+
+  React.useEffect(() => {
+    if (isOpen && task) {
+      setSelectedAssignees(task.assignees?.map((a: any) => a.id) || []);
+      setPriority(task.priority || "MEDIUM");
+      setColumnId(task.columnId || "");
+      setExistingAttachments(task.attachments || []);
+      setAttachmentsToDelete([]);
+      setAttachment(null);
+      setErrors({});
+    }
+  }, [isOpen, task]);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -88,8 +94,14 @@ export function EditTaskModal({ children, task, columns = [], members = [] }: Ed
     );
   };
 
+  const handleStageAttachmentDeletion = (attachmentId: string) => {
+    setAttachmentsToDelete(prev => [...prev, attachmentId]);
+    setExistingAttachments(prev => prev.filter(att => att.id !== attachmentId));
+  };
+
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    if (!task) return;
     setErrors({});
     
     const formData = new FormData(e.currentTarget);
@@ -125,7 +137,19 @@ export function EditTaskModal({ children, task, columns = [], members = [] }: Ed
       const res = await taskService.updateTask(task.id, payload);
       
       if (res.success) {
-        // 2. If there's a new attachment, upload it to the task
+        // 2. Process staged attachment deletions
+        if (attachmentsToDelete.length > 0) {
+          try {
+            await Promise.all(
+              attachmentsToDelete.map(id => taskService.deleteAttachment(task.id, id))
+            );
+          } catch (delError: any) {
+            console.error("Failed to delete some attachments", delError);
+            toast.error("Task updated, but failed to delete some attachments");
+          }
+        }
+
+        // 3. If there's a new attachment, upload it to the task
         if (task.id && attachment) {
           try {
             await taskService.addAttachment(task.id, attachment);
@@ -135,7 +159,7 @@ export function EditTaskModal({ children, task, columns = [], members = [] }: Ed
         }
         
         toast.success("Task updated successfully!");
-        setIsOpen(false);
+        onClose();
         setAttachment(null);
         setSelectedAssignees(task.assignees?.map((a: any) => a.id) || []);
         router.refresh();
@@ -151,15 +175,15 @@ export function EditTaskModal({ children, task, columns = [], members = [] }: Ed
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => {
-      setIsOpen(open);
       if (!open) {
         setErrors({});
         setAttachment(null);
         setSelectedAssignees(task?.assignees?.map((a: any) => a.id) || []);
+        onClose();
       }
     }}>
-      <DialogTrigger render={children as any} />
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-[425px] overflow-hidden no-scrollbar">
+        <div className="w-full flex flex-col gap-4 min-w-0 overflow-x-hidden no-scrollbar">
         <DialogHeader>
           <DialogTitle>Edit Task</DialogTitle>
           <DialogDescription>
@@ -167,8 +191,8 @@ export function EditTaskModal({ children, task, columns = [], members = [] }: Ed
           </DialogDescription>
         </DialogHeader>
         
-        <form onSubmit={handleSubmit} className="py-2">
-          <div className="flex flex-col gap-4">
+        <form onSubmit={handleSubmit} className="py-2 w-full min-w-0 overflow-x-hidden no-scrollbar">
+          <div className="flex flex-col gap-4 w-full min-w-0">
             
             <div className="flex flex-col gap-2">
               <Label htmlFor="title" className="text-sm font-medium">Title <span className="text-red-500">*</span></Label>
@@ -202,7 +226,8 @@ export function EditTaskModal({ children, task, columns = [], members = [] }: Ed
                 <select 
                   id="priority" 
                   name="priority"
-                  defaultValue={task?.priority || "MEDIUM"}
+                  value={priority}
+                  onChange={(e) => setPriority(e.target.value)}
                   disabled={isLoading}
                   className="flex h-10 w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm ring-offset-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 disabled:cursor-not-allowed disabled:opacity-50"
                 >
@@ -220,7 +245,8 @@ export function EditTaskModal({ children, task, columns = [], members = [] }: Ed
                   <select 
                     id="column" 
                     name="column"
-                    defaultValue={task?.columnId}
+                    value={columnId}
+                    onChange={(e) => setColumnId(e.target.value)}
                     disabled={isLoading}
                     className="flex h-10 w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm ring-offset-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 disabled:cursor-not-allowed disabled:opacity-50"
                   >
@@ -237,7 +263,7 @@ export function EditTaskModal({ children, task, columns = [], members = [] }: Ed
             {members.length > 0 && (
               <div className="flex flex-col gap-2 mt-1">
                 <Label className="text-sm font-medium">Assignees</Label>
-                <div className="flex flex-col gap-1.5 max-h-32 overflow-y-auto p-2 border border-slate-200 rounded-md bg-white/50">
+                <div className="flex flex-col gap-1.5 max-h-32 overflow-y-auto no-scrollbar p-2 border border-slate-200 rounded-md bg-white/50">
                   {members.map(m => (
                     <label key={m.id} className="flex items-center gap-2 cursor-pointer p-1 rounded hover:bg-slate-100 transition-colors">
                       <input 
@@ -256,54 +282,91 @@ export function EditTaskModal({ children, task, columns = [], members = [] }: Ed
             )}
 
             {/* Attachment Upload */}
-            <div className="flex flex-col gap-2 mt-1">
-              <Label className="text-sm font-medium">Attachment (Optional)</Label>
-              <input 
-                type="file"
-                ref={fileInputRef}
-                onChange={handleFileChange}
-                disabled={isLoading}
-                accept="image/*,.pdf,.doc,.docx,.ppt,.pptx"
-                className="hidden"
-              />
-              
-              {!attachment ? (
-                <button
-                  type="button"
-                  onClick={() => fileInputRef.current?.click()}
-                  disabled={isLoading}
-                  className="flex items-center justify-center gap-2 w-full h-10 border-2 border-dashed border-slate-200 rounded-md text-sm text-slate-500 hover:border-indigo-400 hover:text-indigo-600 transition-colors bg-slate-50/50"
-                >
-                  <Paperclip className="w-4 h-4" />
-                  Attach a file
-                </button>
-              ) : (
-                <div className="flex items-center justify-between p-2 border border-slate-200 rounded-md bg-white shadow-sm">
-                  <div className="flex items-center gap-2 overflow-hidden">
-                    <Paperclip className="w-4 h-4 text-indigo-500 flex-shrink-0" />
-                    <span className="text-xs font-medium text-slate-700 truncate">{attachment.name}</span>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={removeAttachment}
-                    disabled={isLoading}
-                    className="p-1 hover:bg-slate-100 rounded text-slate-400 hover:text-red-500 transition-colors"
-                  >
-                    <X className="w-4 h-4" />
-                  </button>
+            <div className="flex flex-col gap-2 mt-1 w-full min-w-0">
+              <Label className="text-sm font-medium">Attachments</Label>
+
+              {/* Existing Attachments */}
+              {existingAttachments.length > 0 && (
+                <div className="flex flex-col gap-2 mb-2 w-full min-w-0">
+                  {existingAttachments.map((att) => (
+                    <div key={att.id} className="flex items-center justify-between p-2 border border-slate-200 rounded-md bg-slate-50 shadow-sm min-w-0">
+                      <div className="flex items-center gap-2 overflow-hidden min-w-0 flex-1">
+                        <Paperclip className="w-4 h-4 text-slate-500 flex-shrink-0" />
+                        <a href={att.url} target="_blank" rel="noreferrer" className="text-xs font-medium text-indigo-600 hover:underline truncate min-w-0">
+                          {att.filename}
+                        </a>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => handleStageAttachmentDeletion(att.id)}
+                        disabled={isLoading}
+                        className="p-1 hover:bg-red-100 rounded text-slate-400 hover:text-red-500 transition-colors flex-shrink-0"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    </div>
+                  ))}
                 </div>
+              )}
+
+              {/* Upload New Attachment (Only if total < 3) */}
+              {existingAttachments.length + (attachment ? 1 : 0) < 3 && (
+                <>
+                  <input 
+                    type="file"
+                    ref={fileInputRef}
+                    onChange={handleFileChange}
+                    disabled={isLoading}
+                    accept="image/*,.pdf,.doc,.docx,.ppt,.pptx"
+                    className="hidden"
+                  />
+                  
+                  {!attachment ? (
+                    <button
+                      type="button"
+                      onClick={() => fileInputRef.current?.click()}
+                      disabled={isLoading}
+                      className="flex items-center justify-center gap-2 w-full h-10 border-2 border-dashed border-slate-200 rounded-md text-sm text-slate-500 hover:border-indigo-400 hover:text-indigo-600 transition-colors bg-slate-50/50"
+                    >
+                      <Paperclip className="w-4 h-4" />
+                      Attach a new file
+                    </button>
+                  ) : (
+                    <div className="flex items-center justify-between p-2 border border-slate-200 rounded-md bg-white shadow-sm border-indigo-100 min-w-0">
+                      <div className="flex items-center gap-2 overflow-hidden min-w-0 flex-1">
+                        <Paperclip className="w-4 h-4 text-indigo-500 flex-shrink-0" />
+                        <span className="text-xs font-medium text-slate-700 truncate min-w-0">{attachment.name}</span>
+                        <span className="text-[10px] bg-indigo-100 text-indigo-700 px-1.5 py-0.5 rounded font-medium flex-shrink-0">New</span>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={removeAttachment}
+                        disabled={isLoading}
+                        className="p-1 hover:bg-slate-100 rounded text-slate-400 hover:text-red-500 transition-colors flex-shrink-0"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    </div>
+                  )}
+                </>
+              )}
+              {existingAttachments.length + (attachment ? 1 : 0) >= 3 && !attachment && (
+                <p className="text-xs text-amber-600 flex items-center gap-1">
+                  Maximum of 3 attachments reached.
+                </p>
               )}
             </div>
             
           </div>
           <DialogFooter className="mt-6">
-            <DialogClose render={<Button type="button" variant="outline" disabled={isLoading}>Cancel</Button>} />
+            <Button type="button" variant="outline" onClick={onClose} disabled={isLoading}>Cancel</Button>
             <Button type="submit" className="bg-indigo-600 hover:bg-indigo-700 text-white" disabled={isLoading}>
               {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Edit Task
             </Button>
           </DialogFooter>
         </form>
+        </div>
       </DialogContent>
     </Dialog>
   );

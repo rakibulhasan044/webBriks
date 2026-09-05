@@ -1,6 +1,6 @@
 "use client";
-
 import React, { useState, useRef } from "react";
+import { io } from "socket.io-client";
 import {
   DragDropContext,
   Droppable,
@@ -11,7 +11,6 @@ import { MoreHorizontal, Plus, Paperclip, Loader2 } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { CreateTaskModal } from "./CreateTaskModal";
 import { EditTaskModal } from "./EditTaskModal";
-import { CreateColumnModal } from "./CreateColumnModal";
 import { getImageUrl } from "@/lib/utils";
 import { AvatarImage } from "@/components/ui/avatar";
 import { taskService } from "@/services/task.service";
@@ -28,7 +27,6 @@ import {
   Dialog,
   DialogContent,
   DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
@@ -37,6 +35,7 @@ export default function BoardCanvas({ boardId, initialColumns, priorityStyles, m
   const [columns, setColumns] = useState(initialColumns);
   const [uploadingTaskId, setUploadingTaskId] = useState<string | null>(null);
   const [taskToDelete, setTaskToDelete] = useState<{id: string, title: string} | null>(null);
+  const [taskToEdit, setTaskToEdit] = useState<any>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
 
@@ -44,6 +43,40 @@ export default function BoardCanvas({ boardId, initialColumns, priorityStyles, m
   React.useEffect(() => {
     setColumns(initialColumns);
   }, [initialColumns]);
+
+  React.useEffect(() => {
+    const token = document.cookie
+      .split('; ')
+      .find((row) => row.startsWith('accessToken='))
+      ?.split('=')[1];
+
+    const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:6001/api/v1';
+    const socketUrl = new URL(baseUrl).origin;
+    
+    const socket = io(`${socketUrl}/boards`, {
+      auth: { token }
+    });
+
+    socket.on('connect', () => {
+      socket.emit('join_board', boardId);
+    });
+
+    const handleUpdate = () => {
+      router.refresh();
+    };
+
+    socket.on('task_created', handleUpdate);
+    socket.on('task_updated', handleUpdate);
+    socket.on('task_deleted', handleUpdate);
+    socket.on('column_created', handleUpdate);
+    socket.on('column_updated', handleUpdate);
+    socket.on('column_deleted', handleUpdate);
+
+    return () => {
+      socket.emit('leave_board', boardId);
+      socket.disconnect();
+    };
+  }, [boardId, router]);
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>, taskId: string) => {
     const file = e.target.files?.[0];
@@ -99,7 +132,7 @@ export default function BoardCanvas({ boardId, initialColumns, priorityStyles, m
     window.open(getImageUrl(url) as string, '_blank');
   };
 
-  const onDragEnd = (result: DropResult) => {
+  const onDragEnd = async (result: DropResult) => {
     const { source, destination } = result;
     if (!destination) return;
 
@@ -122,199 +155,246 @@ export default function BoardCanvas({ boardId, initialColumns, priorityStyles, m
     const [movedTask] = sourceTasks.splice(source.index, 1);
     destTasks.splice(destination.index, 0, movedTask);
 
+    // Fractional indexing to calculate the exact position
+    let newPosition = 1000;
+    const destTasksCount = destTasks.length;
+    
+    if (destTasksCount === 1) {
+      newPosition = 1000; // First task ever in this column
+    } else if (destination.index === 0) {
+      // Moved to top
+      const nextTask = destTasks[1];
+      newPosition = Number(nextTask?.position || 1000) - 1000;
+    } else if (destination.index === destTasksCount - 1) {
+      // Moved to bottom
+      const prevTask = destTasks[destTasksCount - 2];
+      newPosition = Number(prevTask?.position || 1000) + 1000;
+    } else {
+      // Moved in between two tasks
+      const prevTask = destTasks[destination.index - 1];
+      const nextTask = destTasks[destination.index + 1];
+      const prevPos = Number(prevTask?.position || 1000);
+      const nextPos = Number(nextTask?.position || prevPos + 2000);
+      newPosition = (prevPos + nextPos) / 2;
+    }
+
+    movedTask.position = newPosition;
+    movedTask.columnId = destination.droppableId;
+
     const newColumns = [...columns];
     newColumns[sourceColIndex] = { ...sourceCol, tasks: sourceTasks };
     if (source.droppableId !== destination.droppableId) {
       newColumns[destColIndex] = { ...destCol, tasks: destTasks };
     }
 
-    setColumns(newColumns);
+    setColumns(newColumns); // Optimistic UI update
     
-    // Here we would emit to WebSocket and call API to persist
+    try {
+      const res = await taskService.updateTask(movedTask.id, {
+        columnId: destination.droppableId,
+        position: newPosition
+      });
+      if (!res.success) {
+        toast.error(res.message || "Failed to update task position");
+        setColumns(initialColumns); // Revert on failure
+      }
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || error.message || "An error occurred while moving the task");
+      setColumns(initialColumns); // Revert on failure
+    }
   };
 
-  return (
+return (
     <DragDropContext onDragEnd={onDragEnd}>
       <div className="flex gap-6 h-full pb-4">
-        {columns.map((col: any) => (
-          <div key={col.id} className="flex-shrink-0 w-80 flex flex-col">
-            {/* Column Header */}
-            <div className={`mb-3 pb-2 border-b-2 ${col.color}`}>
-              <div className="flex items-center justify-between">
-                <h3 className="font-semibold text-slate-800 flex items-center gap-2">
-                  {col.title}
-                  <span className="bg-slate-100 text-slate-600 text-xs py-0.5 px-2 rounded-full font-medium">
-                    {col.tasks.length}
-                  </span>
-                </h3>
-                <button className="p-1 hover:bg-slate-200/50 rounded text-slate-400 hover:text-slate-600 transition-colors">
-                  <MoreHorizontal className="w-4 h-4" />
-                </button>
+        {columns.map((col: any, colIndex: number) => {
+          // Assign a unique pastel theme to each column
+          const columnThemes = [
+            { bg: "bg-amber-50", border: "border-amber-200", headerBg: "bg-amber-100/50", text: "text-amber-900", count: "bg-amber-200 text-amber-800", hover: "hover:bg-amber-200/50", dragOver: "bg-amber-100/80", addBtn: "hover:bg-amber-200/50 hover:text-amber-700 hover:border-amber-300 text-amber-600" },
+            { bg: "bg-emerald-50", border: "border-emerald-200", headerBg: "bg-emerald-100/50", text: "text-emerald-900", count: "bg-emerald-200 text-emerald-800", hover: "hover:bg-emerald-200/50", dragOver: "bg-emerald-100/80", addBtn: "hover:bg-emerald-200/50 hover:text-emerald-700 hover:border-emerald-300 text-emerald-600" },
+            { bg: "bg-sky-50", border: "border-sky-200", headerBg: "bg-sky-100/50", text: "text-sky-900", count: "bg-sky-200 text-sky-800", hover: "hover:bg-sky-200/50", dragOver: "bg-sky-100/80", addBtn: "hover:bg-sky-200/50 hover:text-sky-700 hover:border-sky-300 text-sky-600" },
+            { bg: "bg-violet-50", border: "border-violet-200", headerBg: "bg-violet-100/50", text: "text-violet-900", count: "bg-violet-200 text-violet-800", hover: "hover:bg-violet-200/50", dragOver: "bg-violet-100/80", addBtn: "hover:bg-violet-200/50 hover:text-violet-700 hover:border-violet-300 text-violet-600" },
+            { bg: "bg-rose-50", border: "border-rose-200", headerBg: "bg-rose-100/50", text: "text-rose-900", count: "bg-rose-200 text-rose-800", hover: "hover:bg-rose-200/50", dragOver: "bg-rose-100/80", addBtn: "hover:bg-rose-200/50 hover:text-rose-700 hover:border-rose-300 text-rose-600" },
+          ];
+          const theme = columnThemes[colIndex % columnThemes.length];
+          
+          return (
+            <div key={col.id} className={`flex-shrink-0 w-80 flex flex-col rounded-2xl ${theme.bg} border ${theme.border} p-4 shadow-sm`}>
+              {/* Column Header */}
+              <div className={`mb-3 pb-3 border-b ${theme.border}`}>
+                <div className="flex items-center justify-between">
+                  <h3 className={`font-bold text-sm flex items-center gap-2 ${theme.text}`}>
+                    {col.title}
+                    <span className={`${theme.count} text-xs py-0.5 px-2.5 rounded-full font-bold`}>
+                      {col.tasks.length}
+                    </span>
+                  </h3>
+                  <button className={`p-1.5 rounded-lg transition-colors ${theme.hover} text-slate-400 hover:text-slate-600`}>
+                    <MoreHorizontal className="w-4 h-4" />
+                  </button>
+                </div>
               </div>
-            </div>
 
-            {/* Droppable Area */}
-            <Droppable droppableId={col.id}>
-              {(provided, snapshot) => (
-                <div
-                  ref={provided.innerRef}
-                  {...provided.droppableProps}
-                  className={`flex-1 overflow-y-auto overflow-x-hidden min-h-[150px] p-1.5 -mx-1.5 rounded-lg transition-colors duration-200 no-scrollbar ${
-                    snapshot.isDraggingOver ? "bg-slate-100/50" : "bg-transparent"
-                  }`}
-                >
-                  {col.tasks.map((task: any, index: number) => {
-                    const styles = priorityStyles[task.priority] || priorityStyles.Medium;
-                    
-                    return (
-                      <Draggable
-                        key={task.id}
-                        draggableId={task.id}
-                        index={index}
-                      >
-                        {(provided, snapshot) => (
-                          <div
-                            ref={provided.innerRef}
-                            {...provided.draggableProps}
-                            {...provided.dragHandleProps}
-                            className={`group p-4 rounded-xl border transition-all relative mb-3 ${
-                              styles.cardBg
-                            } ${snapshot.isDragging ? "shadow-lg scale-[1.02] ring-2 ring-indigo-500/20 z-50" : "shadow-sm hover:shadow-md"}`}
-                          >
-                            {/* Priority & Options */}
-                            <div className="flex items-start justify-between mb-3">
-                              <span
-                                className={`px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wide ${styles.pill}`}
-                              >
-                                {task.priority}
-                              </span>
-                              <div className="flex items-center gap-1">
-                                {/* Hidden file input attached to this task */}
-                                <input 
-                                  type="file" 
-                                  id={`upload-${task.id}`} 
-                                  className="hidden" 
-                                  accept="image/*,.pdf,.doc,.docx,.ppt,.pptx"
-                                  onChange={(e) => handleFileUpload(e, task.id)}
-                                />
-                                
-                                <button 
-                                  onClick={() => document.getElementById(`upload-${task.id}`)?.click()}
-                                  className={`p-1 hover:bg-black/5 rounded transition-all ${styles.icon}`}
-                                  title="Add Attachment"
+              {/* Droppable Area */}
+              <Droppable droppableId={col.id}>
+                {(provided, snapshot) => (
+                  <div
+                    ref={provided.innerRef}
+                    {...provided.droppableProps}
+                    className={`flex-1 overflow-y-auto overflow-x-hidden min-h-[150px] rounded-xl transition-all duration-300 no-scrollbar ${
+                      snapshot.isDraggingOver ? `${theme.dragOver} ring-2 ring-inset ring-white/50` : "bg-transparent"
+                    }`}
+                  >
+                    {col.tasks.map((task: any, index: number) => {
+                      const styles = priorityStyles[task.priority] || priorityStyles.Medium;
+                      
+                      return (
+                        <Draggable
+                          key={task.id}
+                          draggableId={task.id}
+                          index={index}
+                        >
+                          {(provided, snapshot) => (
+                            <div
+                              ref={provided.innerRef}
+                              {...provided.draggableProps}
+                              {...provided.dragHandleProps}
+                              className={`group p-4 rounded-xl border transition-all duration-200 relative mb-3 bg-white/80 backdrop-blur-sm ${
+                                snapshot.isDragging 
+                                  ? "shadow-xl scale-[1.02] ring-2 ring-indigo-400/30 z-50 rotate-1" 
+                                  : "shadow-sm hover:shadow-md hover:bg-white"
+                              }`}
+                            >
+                              {/* Priority & Options */}
+                              <div className="flex items-start justify-between mb-3">
+                                <span
+                                  className={`px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wide ${styles.pill}`}
                                 >
-                                  {uploadingTaskId === task.id ? (
-                                    <Loader2 className="w-4 h-4 animate-spin" />
-                                  ) : (
-                                    <Paperclip className="w-4 h-4" />
-                                  )}
-                                </button>
-                                
-                                <DropdownMenu>
-                                  <DropdownMenuTrigger render={
-                                    <button
-                                      className={`p-1 hover:bg-black/5 rounded transition-all ${styles.icon}`}
-                                      title="Task Options"
-                                    >
-                                      <MoreHorizontal className="w-4 h-4" />
-                                    </button>
-                                  } />
-                                  <DropdownMenuContent align="end" className="w-40 bg-white/95 backdrop-blur-md border border-slate-200/50 shadow-lg">
-                                    {/* In the future, we could add an EditTaskModal here */}
-                                    <EditTaskModal task={task} columns={columns} members={members}>
-                                      <DropdownMenuItem onSelect={(e) => e.preventDefault()} className="cursor-pointer">
+                                  {task.priority}
+                                </span>
+                                <div className="flex items-center gap-1">
+                                  {/* Hidden file input attached to this task */}
+                                  <input 
+                                    type="file" 
+                                    id={`upload-${task.id}`} 
+                                    className="hidden" 
+                                    accept="image/*,.pdf,.doc,.docx,.ppt,.pptx"
+                                    onChange={(e) => handleFileUpload(e, task.id)}
+                                  />
+                                  
+                                  <button 
+                                    onClick={() => document.getElementById(`upload-${task.id}`)?.click()}
+                                    className={`p-1.5 hover:bg-slate-100 rounded-lg transition-all ${styles.icon}`}
+                                    title="Add Attachment"
+                                  >
+                                    {uploadingTaskId === task.id ? (
+                                      <Loader2 className="w-4 h-4 animate-spin" />
+                                    ) : (
+                                      <Paperclip className="w-4 h-4" />
+                                    )}
+                                  </button>
+                                  
+                                  <DropdownMenu>
+                                    <DropdownMenuTrigger render={
+                                      <button
+                                        className={`p-1.5 hover:bg-slate-100 rounded-lg transition-all ${styles.icon}`}
+                                        title="Task Options"
+                                      >
+                                        <MoreHorizontal className="w-4 h-4" />
+                                      </button>
+                                    } />
+                                    <DropdownMenuContent align="end" className="w-40 bg-white/95 backdrop-blur-md border border-slate-200/50 shadow-lg">
+                                      <DropdownMenuItem onClick={() => setTaskToEdit(task)} className="cursor-pointer">
                                         <Edit2 className="w-4 h-4 mr-2 text-slate-500" />
                                         Edit Task
                                       </DropdownMenuItem>
-                                    </EditTaskModal>
-                                    <DropdownMenuItem onClick={() => setTaskToDelete({ id: task.id, title: task.title })} className="text-red-600 focus:text-red-700 focus:bg-red-50">
-                                      <Trash2 className="w-4 h-4 mr-2" />
-                                      Delete Task
-                                    </DropdownMenuItem>
-                                  </DropdownMenuContent>
-                                </DropdownMenu>
+                                      <DropdownMenuItem onClick={() => setTaskToDelete({ id: task.id, title: task.title })} className="text-red-600 focus:text-red-700 focus:bg-red-50">
+                                        <Trash2 className="w-4 h-4 mr-2" />
+                                        Delete Task
+                                      </DropdownMenuItem>
+                                    </DropdownMenuContent>
+                                  </DropdownMenu>
+                                </div>
+                              </div>
+
+                              {/* Title & Description */}
+                              <h4 className={`text-sm font-bold leading-snug mb-1.5 ${styles.text}`}>
+                                {task.title}
+                              </h4>
+                              
+                              {task.description && (
+                                <p className="text-xs text-slate-500 line-clamp-2 mb-4 leading-relaxed">
+                                  {task.description}
+                                </p>
+                              )}
+
+                              {/* Attachments List */}
+                              {task.attachments && task.attachments.length > 0 && (
+                                <div className="flex flex-wrap gap-1.5 mb-4">
+                                  {task.attachments.map((att: any) => (
+                                    <button
+                                      key={att.id}
+                                      onClick={() => openAttachment(att.url)}
+                                      className="flex items-center gap-1 bg-slate-50 hover:bg-slate-100 text-slate-600 text-[10px] font-medium px-2 py-1.5 rounded-lg border border-slate-200/60 shadow-sm transition-colors max-w-full"
+                                      title={att.filename}
+                                    >
+                                      <Paperclip className="w-3 h-3 flex-shrink-0 text-slate-400" />
+                                      <span className="truncate max-w-[120px]">{att.filename}</span>
+                                    </button>
+                                  ))}
+                                </div>
+                              )}
+
+                              {/* Footer */}
+                              <div className="flex items-center justify-between mt-auto pt-3 border-t border-slate-100">
+                                <div className={`flex items-center gap-3 ${styles.icon}`}>
+                                  {task.comments > 0 && (
+                                    <div className="flex items-center gap-1.5 text-xs font-medium text-slate-500">
+                                      <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                                        <path strokeLinecap="round" strokeLinejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                                      </svg>
+                                      {task.comments}
+                                    </div>
+                                  )}
+                                </div>
+
+                                <div className="flex items-center -space-x-1.5">
+                                  {task.assignees && task.assignees.length > 0 ? (
+                                    task.assignees.map((assignee: any) => (
+                                      <Avatar key={assignee.id} className="h-6 w-6 border-2 border-white shadow-sm bg-white" title={assignee.name}>
+                                        {assignee.photo && <AvatarImage src={getImageUrl(assignee.photo) as string} />}
+                                        <AvatarFallback className="bg-indigo-100 text-indigo-700 text-[10px] font-bold">
+                                          {assignee.name?.charAt(0) || "U"}
+                                        </AvatarFallback>
+                                      </Avatar>
+                                    ))
+                                  ) : (
+                                    <div className="h-6 w-6 rounded-full border-2 border-white shadow-sm bg-slate-50 flex items-center justify-center border-dashed border-slate-300" title="Unassigned">
+                                      <span className="text-[10px] font-bold text-slate-400">?</span>
+                                    </div>
+                                  )}
+                                </div>
                               </div>
                             </div>
-
-                            {/* Title & Description */}
-                            <h4 className={`text-sm font-semibold leading-snug mb-1.5 ${styles.text}`}>
-                              {task.title}
-                            </h4>
-                            
-                            {task.description && (
-                              <p className="text-xs text-slate-500 line-clamp-2 mb-4 leading-relaxed">
-                                {task.description}
-                              </p>
-                            )}
-
-                            {/* Attachments List */}
-                            {task.attachments && task.attachments.length > 0 && (
-                              <div className="flex flex-wrap gap-1.5 mb-4">
-                                {task.attachments.map((att: any) => (
-                                  <button
-                                    key={att.id}
-                                    onClick={() => openAttachment(att.url)}
-                                    className="flex items-center gap-1 bg-white/60 hover:bg-white text-slate-600 text-[10px] font-medium px-2 py-1 rounded border border-slate-200/60 shadow-sm transition-colors max-w-full"
-                                    title={att.filename}
-                                  >
-                                    <Paperclip className="w-3 h-3 flex-shrink-0" />
-                                    <span className="truncate max-w-[120px]">{att.filename}</span>
-                                  </button>
-                                ))}
-                              </div>
-                            )}
-
-                            {/* Footer */}
-                            <div className="flex items-center justify-between mt-auto pt-2 border-t border-slate-200/50">
-                              <div className={`flex items-center gap-3 ${styles.icon}`}>
-                                {task.comments > 0 && (
-                                  <div className="flex items-center gap-1.5 text-xs font-medium">
-                                    <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
-                                      <path strokeLinecap="round" strokeLinejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-                                    </svg>
-                                    {task.comments}
-                                  </div>
-                                )}
-                              </div>
-
-                              <div className="flex items-center -space-x-1.5">
-                                {task.assignees && task.assignees.length > 0 ? (
-                                  task.assignees.map((assignee: any) => (
-                                    <Avatar key={assignee.id} className="h-6 w-6 border-2 border-white shadow-sm bg-white" title={assignee.name}>
-                                      {assignee.photo && <AvatarImage src={getImageUrl(assignee.photo) as string} />}
-                                      <AvatarFallback className="bg-indigo-100 text-indigo-700 text-[10px] font-bold">
-                                        {assignee.name?.charAt(0) || "U"}
-                                      </AvatarFallback>
-                                    </Avatar>
-                                  ))
-                                ) : (
-                                  <div className="h-6 w-6 rounded-full border-2 border-white shadow-sm bg-slate-50 flex items-center justify-center border-dashed border-slate-300" title="Unassigned">
-                                    <span className="text-[10px] font-bold text-slate-400">?</span>
-                                  </div>
-                                )}
-                              </div>
-                            </div>
-                          </div>
-                        )}
-                      </Draggable>
-                    );
-                  })}
-                  {provided.placeholder}
-                  
-                  {/* Add Task Button */}
-                  <CreateTaskModal columnId={col.id} members={members}>
-                    <button className="w-full py-2.5 flex items-center justify-center gap-2 text-sm font-medium text-slate-500 hover:text-slate-700 hover:bg-slate-200/50 rounded-lg transition-colors border border-transparent border-dashed hover:border-slate-300 mt-2">
-                      <Plus className="w-4 h-4" />
-                      Add task
-                    </button>
-                  </CreateTaskModal>
-                </div>
-              )}
-            </Droppable>
-          </div>
-        ))}
-
-
+                          )}
+                        </Draggable>
+                      );
+                    })}
+                    {provided.placeholder}
+                    
+                    {/* Add Task Button */}
+                    <CreateTaskModal columnId={col.id} members={members}>
+                      <button className={`w-full py-2.5 flex items-center justify-center gap-2 text-sm font-bold rounded-xl transition-all border border-dashed mt-2 ${theme.addBtn}`}>
+                        <Plus className="w-4 h-4" />
+                        Add task
+                      </button>
+                    </CreateTaskModal>
+                  </div>
+                )}
+              </Droppable>
+            </div>
+          );
+        })}
       </div>
 
       <Dialog open={!!taskToDelete} onOpenChange={(open) => !open && setTaskToDelete(null)}>
@@ -347,6 +427,16 @@ export default function BoardCanvas({ boardId, initialColumns, priorityStyles, m
           </div>
         </DialogContent>
       </Dialog>
+
+      {taskToEdit && (
+        <EditTaskModal 
+          task={taskToEdit} 
+          columns={columns} 
+          members={members} 
+          isOpen={true} 
+          onClose={() => setTaskToEdit(null)} 
+        />
+      )}
     </DragDropContext>
   );
 }

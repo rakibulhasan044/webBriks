@@ -21,5 +21,9 @@ export const taskService = {
         'Content-Type': 'multipart/form-data',
       },
     });
+  },
+
+  deleteAttachment: async (taskId: string, attachmentId: string) => {
+    return httpClient.delete(`/tasks/${taskId}/attachments/${attachmentId}`);
   }
 };

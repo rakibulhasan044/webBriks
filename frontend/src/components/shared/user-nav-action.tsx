@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { LayoutDashboard, LogOut, User } from "lucide-react";
+import { ChevronDown, LayoutDashboard, LogOut, User } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -32,63 +32,75 @@ export function UserNavAction({ user }: { user: any | null }) {
     );
   }
 
-  return (
+return (
     <DropdownMenu>
-      <DropdownMenuTrigger className="flex items-center gap-3 focus:outline-none rounded-lg p-1.5 hover:bg-slate-50 transition-colors border border-transparent hover:border-slate-200">
-        <Avatar className="h-9 w-9 border border-slate-200 shadow-sm transition-all">
+      <DropdownMenuTrigger className="flex items-center gap-3 focus:outline-none rounded-xl p-1.5 pr-3 hover:bg-white hover:shadow-sm transition-all duration-200 border border-transparent hover:border-slate-200/80 group">
+        <Avatar className="h-9 w-9 border-2 border-white shadow-sm ring-1 ring-slate-100 transition-transform group-hover:scale-105">
           {user.photo && typeof user.photo === "string" && user.photo !== "null" && (
             <AvatarImage src={user.photo} alt="User Avatar" className="object-cover" />
           )}
-          <AvatarFallback className="bg-indigo-50 text-indigo-500">
+          <AvatarFallback className="bg-indigo-50 text-indigo-600">
             <User className="h-4 w-4" />
           </AvatarFallback>
         </Avatar>
         <div className="hidden sm:flex flex-col items-start text-left">
-          <span className="text-sm font-semibold text-slate-900 leading-tight">
+          <span className="text-[13px] font-bold text-slate-800 leading-tight">
             {user.name || "User"}
           </span>
-          <span className="text-xs text-slate-500 leading-tight">
+          <span className="text-[11px] text-slate-400 font-medium leading-tight">
             {user.email || "No email"}
           </span>
         </div>
+        <ChevronDown className="w-3.5 h-3.5 text-slate-400 hidden sm:block transition-transform group-data-[state=open]:rotate-180" />
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-56 mt-1">
+      
+      <DropdownMenuContent align="end" className="w-60 mt-2 bg-white/85 backdrop-blur-2xl border border-slate-200/50 shadow-xl shadow-slate-200/20 rounded-2xl p-1.5">
+        {/* Mobile user info */}
         <DropdownMenuGroup className="sm:hidden">
           <DropdownMenuLabel className="font-normal p-3">
             <div className="flex items-center gap-3">
-              <Avatar className="h-9 w-9 border border-slate-200 shadow-sm">
+              <Avatar className="h-10 w-10 border-2 border-white shadow-sm ring-1 ring-slate-100">
                 {user.photo && typeof user.photo === "string" && user.photo !== "null" && (
                   <AvatarImage src={user.photo} alt="User Avatar" className="object-cover" />
                 )}
-                <AvatarFallback className="bg-indigo-50 text-indigo-500">
+                <AvatarFallback className="bg-indigo-50 text-indigo-600">
                   <User className="h-4 w-4" />
                 </AvatarFallback>
               </Avatar>
               <div className="flex flex-col space-y-1 overflow-hidden">
-                <p className="text-sm font-semibold text-slate-900 leading-none truncate">
+                <p className="text-sm font-bold text-slate-800 leading-none truncate">
                   {user.name || "User"}
                 </p>
-                <p className="text-xs text-slate-500 leading-none truncate">
+                <p className="text-xs text-slate-400 font-medium leading-none truncate">
                   {user.email || "No email"}
                 </p>
               </div>
             </div>
           </DropdownMenuLabel>
         </DropdownMenuGroup>
-        <DropdownMenuSeparator className="sm:hidden" />
+        <DropdownMenuSeparator className="sm:hidden bg-slate-100" />
+        
+        {/* Menu Items */}
         <DropdownMenuItem
           render={<Link href="/dashboard" />}
-          className="cursor-pointer text-slate-600 hover:text-slate-900 focus:bg-slate-50"
+          className="rounded-xl cursor-pointer text-slate-600 hover:text-slate-900 focus:bg-sky-50 focus:text-sky-700 p-2.5"
         >
-          <LayoutDashboard className="mr-2 h-4 w-4" />
-          <span>Dashboard</span>
+          <div className="w-8 h-8 rounded-lg bg-sky-100 flex items-center justify-center mr-3 shadow-sm">
+            <LayoutDashboard className="w-4 h-4 text-sky-600" />
+          </div>
+          <span className="text-sm font-semibold">Dashboard</span>
         </DropdownMenuItem>
+        
+        <div className="h-px bg-slate-100 my-1" />
+        
         <DropdownMenuItem
           onClick={handleLogout}
-          className="cursor-pointer text-red-600 focus:text-red-700 focus:bg-red-50"
+          className="rounded-xl cursor-pointer focus:bg-rose-50 focus:text-rose-700 p-2.5"
         >
-          <LogOut className="mr-2 h-4 w-4" />
-          <span>Log out</span>
+          <div className="w-8 h-8 rounded-lg bg-rose-100 flex items-center justify-center mr-3 shadow-sm">
+            <LogOut className="w-4 h-4 text-rose-600" />
+          </div>
+          <span className="text-sm font-semibold text-rose-600">Log out</span>
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

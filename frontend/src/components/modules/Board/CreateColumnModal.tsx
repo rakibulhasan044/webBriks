@@ -17,13 +17,7 @@ import { columnService } from "@/services/column.service";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { Loader2, Plus } from "lucide-react";
-import { z } from "zod";
-
-const createColumnSchema = z.object({
-  title: z.enum(["TO_DO", "IN_PROGRESS", "IN_REVIEW", "DONE"], {
-    errorMap: () => ({ message: "Please select a valid column title" }),
-  }),
-});
+import { createColumnSchema } from "@/zod/column.validation";
 
 export function CreateColumnModal({ children, boardId }: { children: React.ReactNode, boardId: string }) {
   const [isOpen, setIsOpen] = useState(false);
