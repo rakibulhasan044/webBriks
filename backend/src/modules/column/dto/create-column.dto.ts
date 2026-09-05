@@ -1,18 +1,20 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsNumber, IsString } from 'class-validator';
+import { IsEnum, IsNotEmpty, IsNumber } from 'class-validator';
+import { ColumnTitle } from '../../../generated/prisma/enums';
 
 export class CreateColumnDto {
   @ApiProperty({
-    description: 'Title of the column',
-    example: 'To Do',
+    description: 'Title of the column from the available enum',
+    enum: ColumnTitle,
+    example: ColumnTitle.TO_DO,
   })
-  @IsString({
-    message: 'Title must be a string',
+  @IsEnum(ColumnTitle, {
+    message: 'Title must be one of the predefined column titles',
   })
   @IsNotEmpty({
     message: 'Title can not be empty',
   })
-  title!: string;
+  title!: ColumnTitle;
 
   @ApiProperty({
     description: 'Position of the column (fractional index)',

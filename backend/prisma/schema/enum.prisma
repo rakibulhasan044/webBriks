@@ -8,3 +8,10 @@ enum TaskPriority {
     MEDIUM
     HIGH
 }
+
+enum ColumnTitle {
+    TO_DO @map("To Do")
+    IN_PROGRESS @map("In Progress")
+    IN_REVIEW @map("In Review")
+    DONE @map("Done")
+}

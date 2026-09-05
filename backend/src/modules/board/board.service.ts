@@ -34,12 +34,12 @@ export class BoardService {
         title: createBoardDto.title,
         description: createBoardDto.description,
         coverImage: coverImageUrl,
-        ownerId: userId,
+        owner: { connect: { id: userId } },
         columns: {
           create: [
-            { title: 'To Do', position: 1000 },
-            { title: 'In Progress', position: 2000 },
-            { title: 'Done', position: 3000 },
+            { title: 'TO_DO', position: 1000 },
+            { title: 'IN_PROGRESS', position: 2000 },
+            { title: 'DONE', position: 3000 },
           ],
         },
       },
@@ -69,6 +69,10 @@ export class BoardService {
         orderBy: { createdAt: 'desc' },
         skip,
         take: limit,
+        include: {
+          owner: { select: { id: true, name: true, photo: true } },
+          members: true,
+        },
       }),
       this.prismaService.board.count({ where }),
     ]);

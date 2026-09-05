@@ -9,6 +9,8 @@ import {
 } from "@hello-pangea/dnd";
 import { MoreHorizontal, Plus } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { CreateTaskModal } from "./CreateTaskModal";
+import { CreateColumnModal } from "./CreateColumnModal";
 
 export default function BoardCanvas({ initialColumns, priorityStyles }: any) {
   const [columns, setColumns] = useState(initialColumns);
@@ -170,15 +172,28 @@ export default function BoardCanvas({ initialColumns, priorityStyles }: any) {
                   {provided.placeholder}
                   
                   {/* Add Task Button */}
-                  <button className="w-full py-2.5 flex items-center justify-center gap-2 text-sm font-medium text-slate-500 hover:text-slate-700 hover:bg-slate-200/50 rounded-lg transition-colors border border-transparent border-dashed hover:border-slate-300 mt-2">
-                    <Plus className="w-4 h-4" />
-                    Add task
-                  </button>
+                  <CreateTaskModal columnId={col.id}>
+                    <button className="w-full py-2.5 flex items-center justify-center gap-2 text-sm font-medium text-slate-500 hover:text-slate-700 hover:bg-slate-200/50 rounded-lg transition-colors border border-transparent border-dashed hover:border-slate-300 mt-2">
+                      <Plus className="w-4 h-4" />
+                      Add task
+                    </button>
+                  </CreateTaskModal>
                 </div>
               )}
             </Droppable>
           </div>
         ))}
+
+        {/* Add Column Button */}
+        <div className="flex-shrink-0 w-80">
+          <CreateColumnModal>
+            <button className="w-full h-12 flex items-center justify-center gap-2 text-sm font-medium text-slate-500 bg-white/50 hover:bg-white border-2 border-dashed border-slate-200 hover:border-slate-300 rounded-xl transition-all shadow-sm hover:shadow">
+              <Plus className="w-4 h-4" />
+              Add new column
+            </button>
+          </CreateColumnModal>
+        </div>
+
       </div>
     </DragDropContext>
   );

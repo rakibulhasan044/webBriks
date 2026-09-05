@@ -1,17 +1,19 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNumber, IsOptional, IsString } from 'class-validator';
+import { IsEnum, IsNumber, IsOptional } from 'class-validator';
+import { ColumnTitle } from '../../../generated/prisma/enums';
 
 export class UpdateColumnDto {
   @ApiProperty({
     description: 'Title of the column',
-    example: 'In Progress',
+    enum: ColumnTitle,
+    example: ColumnTitle.IN_PROGRESS,
     required: false,
   })
-  @IsString({
-    message: 'Title must be a string',
+  @IsEnum(ColumnTitle, {
+    message: 'Title must be one of the predefined column titles',
   })
   @IsOptional()
-  title?: string;
+  title?: ColumnTitle;
 
   @ApiProperty({
     description: 'Position of the column',

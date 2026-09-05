@@ -21,8 +21,8 @@ export const CurrentUser = createParamDecorator(
 // Current User ID
 export const CurrentUserId = createParamDecorator(
   (_: unknown, ctx: ExecutionContext) => {
-    const request = ctx.switchToHttp().getRequest<AuthRequest>();
-    return request.user?.id;
+    const request = ctx.switchToHttp().getRequest<any>();
+    return request.user?.sub || request.user?.id;
   },
 );
 
