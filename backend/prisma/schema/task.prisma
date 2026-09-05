@@ -6,14 +6,14 @@ model Task {
     position    Float // fractional index for ordering within a column
     columnId    String
     column      Column       @relation(fields: [columnId], references: [id], onDelete: Cascade)
-    assigneeId  String?
-    assignee    User?        @relation("TaskAssignee", fields: [assigneeId], references: [id])
+    assignees   User[]       @relation("TaskAssignee")
+    creatorId   String?
+    creator     User?        @relation("TaskCreator", fields: [creatorId], references: [id])
     createdAt   DateTime     @default(now())
     updatedAt   DateTime     @updatedAt
 
     attachments TaskAttachment[]
 
     @@index([columnId])
-    @@index([assigneeId])
     @@map("tasks")
 }

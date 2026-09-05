@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsNumber, IsOptional, IsString, IsEnum } from 'class-validator';
+import { IsNotEmpty, IsNumber, IsOptional, IsString, IsEnum, IsArray } from 'class-validator';
 import { TaskPriority } from '../../../generated/prisma/enums';
 
 export class CreateTaskDto {
@@ -38,10 +38,12 @@ export class CreateTaskDto {
   position?: number;
 
   @ApiProperty({
-    description: 'Optional user ID to assign the task to',
+    description: 'Optional list of user IDs to assign the task to',
     required: false,
+    type: [String],
   })
-  @IsString()
+  @IsArray()
+  @IsString({ each: true })
   @IsOptional()
-  assigneeId?: string;
+  assigneeIds?: string[];
 }

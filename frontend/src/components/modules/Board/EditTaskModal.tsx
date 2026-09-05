@@ -20,7 +20,7 @@ import { useRouter } from "next/navigation";
 import { Loader2, Paperclip, X } from "lucide-react";
 import { z } from "zod";
 
-const createTaskSchema = z.object({
+const editTaskSchema = z.object({
   title: z.string().min(1, "Title is required").max(100, "Title is too long"),
   description: z.string().max(1000, "Description is too long").optional(),
   priority: z.enum(["LOW", "MEDIUM", "HIGH"]),
@@ -36,19 +36,23 @@ type FormErrors = {
   selectedColumnId?: string[];
 };
 
-interface CreateTaskModalProps {
+interface EditTaskModalProps {
   children: React.ReactNode;
-  columnId?: string; 
+  task: any; 
   columns?: { id: string; title: string }[];
   members?: { id: string; name: string; photo?: string }[];
 }
 
-export function CreateTaskModal({ children, columnId, columns = [], members = [] }: CreateTaskModalProps) {
+export function EditTaskModal({ children, task, columns = [], members = [] }: EditTaskModalProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState<FormErrors>({});
   const [attachment, setAttachment] = useState<File | null>(null);
-  const [selectedAssignees, setSelectedAssignees] = useState<string[]>([]);
+  
+  // Set initial selected assignees from task data
+  const [selectedAssignees, setSelectedAssignees] = useState<string[]>(
+    task?.assignees?.map((a: any) => a.id) || []
+  );
   const fileInputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
 
@@ -94,10 +98,10 @@ export function CreateTaskModal({ children, columnId, columns = [], members = []
       description: formData.get("description") as string,
       priority: formData.get("priority") as string,
       assigneeIds: selectedAssignees,
-      selectedColumnId: formData.get("column") as string || columnId || "",
+      selectedColumnId: formData.get("column") as string || task.columnId || "",
     };
 
-    const result = createTaskSchema.safeParse(data);
+    const result = editTaskSchema.safeParse(data);
 
     if (!result.success) {
       const fieldErrors = result.error.flatten().fieldErrors;
@@ -111,33 +115,32 @@ export function CreateTaskModal({ children, columnId, columns = [], members = []
         title: result.data.title,
         description: result.data.description,
         priority: result.data.priority,
+        columnId: result.data.selectedColumnId,
       };
       if (result.data.assigneeIds && result.data.assigneeIds.length > 0) {
         payload.assigneeIds = result.data.assigneeIds;
       }
 
-      // 1. Create the task
-      const res = await taskService.createTask(result.data.selectedColumnId, payload);
+      // 1. Update the task
+      const res = await taskService.updateTask(task.id, payload);
       
       if (res.success) {
-        // 2. If there's an attachment, upload it to the newly created task
-        const taskId = res.data?.id || (res as any).id; // Fallback depending on backend structure
-        
-        if (taskId && attachment) {
+        // 2. If there's a new attachment, upload it to the task
+        if (task.id && attachment) {
           try {
-            await taskService.addAttachment(taskId, attachment);
+            await taskService.addAttachment(task.id, attachment);
           } catch (attError: any) {
-            toast.error(attError?.message || "Task created, but failed to upload attachment");
+            toast.error(attError?.message || "Task updated, but failed to upload attachment");
           }
         }
         
-        toast.success("Task created successfully!");
+        toast.success("Task updated successfully!");
         setIsOpen(false);
         setAttachment(null);
-        setSelectedAssignees([]);
+        setSelectedAssignees(task.assignees?.map((a: any) => a.id) || []);
         router.refresh();
       } else {
-        toast.error(res.message || "Failed to create task");
+        toast.error(res.message || "Failed to edit task");
       }
     } catch (error: any) {
       toast.error(error.message || "An unexpected error occurred");
@@ -152,15 +155,15 @@ export function CreateTaskModal({ children, columnId, columns = [], members = []
       if (!open) {
         setErrors({});
         setAttachment(null);
-        setSelectedAssignees([]);
+        setSelectedAssignees(task?.assignees?.map((a: any) => a.id) || []);
       }
     }}>
       <DialogTrigger render={children as any} />
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Create New Task</DialogTitle>
+          <DialogTitle>Edit Task</DialogTitle>
           <DialogDescription>
-            Add a new task to your board.
+            Update the details of your task.
           </DialogDescription>
         </DialogHeader>
         
@@ -172,10 +175,11 @@ export function CreateTaskModal({ children, columnId, columns = [], members = []
               <Input 
                 id="title" 
                 name="title"
+                defaultValue={task?.title}
                 placeholder="e.g. Update landing page copy" 
                 disabled={isLoading}
               />
-              {errors.title && <p className="text-sm text-red-500">{errors.title[0]}</p>}
+              {errors.title && <p className="text-xs text-red-500">{errors.title[0]}</p>}
             </div>
             
             <div className="flex flex-col gap-2">
@@ -183,11 +187,12 @@ export function CreateTaskModal({ children, columnId, columns = [], members = []
               <textarea 
                 id="description" 
                 name="description"
-                placeholder="Add some details..." 
+                defaultValue={task?.description}
+                placeholder="Add more details about this task..." 
                 disabled={isLoading}
-                className="flex min-h-[80px] w-full rounded-md border border-slate-200 bg-transparent px-3 py-2 text-sm shadow-sm placeholder:text-slate-500 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-slate-950"
+                className="flex min-h-[80px] w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm ring-offset-white placeholder:text-slate-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 disabled:cursor-not-allowed disabled:opacity-50"
               />
-              {errors.description && <p className="text-sm text-red-500">{errors.description[0]}</p>}
+              {errors.description && <p className="text-xs text-red-500">{errors.description[0]}</p>}
             </div>
 
             <div className="grid grid-cols-2 gap-4">
@@ -197,33 +202,33 @@ export function CreateTaskModal({ children, columnId, columns = [], members = []
                 <select 
                   id="priority" 
                   name="priority"
-                  defaultValue="MEDIUM"
+                  defaultValue={task?.priority || "MEDIUM"}
                   disabled={isLoading}
-                  className="flex h-9 w-full rounded-md border border-slate-200 bg-transparent px-3 py-1 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-slate-950"
+                  className="flex h-10 w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm ring-offset-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   <option value="LOW">Low</option>
                   <option value="MEDIUM">Medium</option>
                   <option value="HIGH">High</option>
                 </select>
-                {errors.priority && <p className="text-sm text-red-500">{errors.priority[0]}</p>}
+                {errors.priority && <p className="text-xs text-red-500">{errors.priority[0]}</p>}
               </div>
 
               {/* Column Select */}
-              {!columnId && columns.length > 0 && (
+              {columns && columns.length > 0 && (
                 <div className="flex flex-col gap-2">
-                  <Label htmlFor="column" className="text-sm font-medium">Column <span className="text-red-500">*</span></Label>
+                  <Label htmlFor="column" className="text-sm font-medium">Column</Label>
                   <select 
                     id="column" 
                     name="column"
-                    defaultValue={columns[0]?.id || ""}
+                    defaultValue={task?.columnId}
                     disabled={isLoading}
-                    className="flex h-9 w-full rounded-md border border-slate-200 bg-transparent px-3 py-1 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-slate-950"
+                    className="flex h-10 w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm ring-offset-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 disabled:cursor-not-allowed disabled:opacity-50"
                   >
                     {columns.map(c => (
                       <option key={c.id} value={c.id}>{c.title}</option>
                     ))}
                   </select>
-                  {errors.selectedColumnId && <p className="text-sm text-red-500">{errors.selectedColumnId[0]}</p>}
+                  {errors.selectedColumnId && <p className="text-xs text-red-500">{errors.selectedColumnId[0]}</p>}
                 </div>
               )}
             </div>
@@ -295,7 +300,7 @@ export function CreateTaskModal({ children, columnId, columns = [], members = []
             <DialogClose render={<Button type="button" variant="outline" disabled={isLoading}>Cancel</Button>} />
             <Button type="submit" className="bg-indigo-600 hover:bg-indigo-700 text-white" disabled={isLoading}>
               {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Create Task
+              Edit Task
             </Button>
           </DialogFooter>
         </form>

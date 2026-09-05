@@ -2,6 +2,7 @@ import {
   Injectable,
   NotFoundException,
   ForbiddenException,
+  BadRequestException,
 } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { CreateColumnDto } from './dto/create-column.dto';
@@ -25,6 +26,8 @@ export class ColumnService {
     if (!isOwner && !isMember) {
       throw new ForbiddenException('You do not have access to this board');
     }
+
+    return board;
   }
 
   // Helper to check access via columnId
@@ -40,30 +43,63 @@ export class ColumnService {
   async create(boardId: string, userId: string, dto: CreateColumnDto) {
     await this.verifyBoardAccess(boardId, userId);
 
+    // Enforce uniqueness: there can be only one column with the title per board
+    const existingColumn = await this.prisma.column.findFirst({
+      where: {
+        boardId,
+        title: dto.title
+      }
+    });
+
+    if (existingColumn) {
+      throw new BadRequestException(`A column with the title "${dto.title}" already exists on this board`);
+    }
+
+    // Auto-calculate position if not provided
+    let position = dto.position;
+    if (position === undefined) {
+      const lastColumn = await this.prisma.column.findFirst({
+        where: { boardId },
+        orderBy: { position: 'desc' },
+      });
+      position = lastColumn ? lastColumn.position + 1000 : 1000;
+    }
+
     return this.prisma.column.create({
       data: {
         title: dto.title,
-        position: dto.position,
+        position,
         boardId,
       },
     });
   }
 
   async findAll(boardId: string, userId: string) {
-    await this.verifyBoardAccess(boardId, userId);
+    const board = await this.verifyBoardAccess(boardId, userId);
 
-    return this.prisma.column.findMany({
+    const columns = await this.prisma.column.findMany({
       where: { boardId },
       orderBy: { position: 'asc' },
       include: {
         tasks: {
           orderBy: { position: 'asc' },
           include: {
-            assignee: { select: { id: true, name: true, photo: true } },
+            assignees: { select: { id: true, name: true, photo: true } },
           },
         },
       },
     });
+
+    const isOwner = board.ownerId === userId;
+    if (!isOwner) {
+      columns.forEach(column => {
+        column.tasks = column.tasks.filter(task => 
+          task.assignees.some(assignee => assignee.id === userId)
+        );
+      });
+    }
+
+    return columns;
   }
 
   async update(id: string, userId: string, dto: UpdateColumnDto) {

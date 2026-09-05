@@ -99,7 +99,7 @@ export class BoardService {
             tasks: {
               orderBy: { position: 'asc' },
               include: {
-                assignee: {
+                assignees: {
                   select: { id: true, name: true, email: true, photo: true },
                 },
                 attachments: true,
@@ -120,6 +120,15 @@ export class BoardService {
 
     if (!isOwner && !isMember) {
       throw new ForbiddenException('You do not have access to this board');
+    }
+
+    if (!isOwner && isMember) {
+      // Members can only see tasks they are assigned to
+      board.columns.forEach(column => {
+        column.tasks = column.tasks.filter(task => 
+          task.assignees.some(assignee => assignee.id === userId)
+        );
+      });
     }
 
     return board;
@@ -174,11 +183,37 @@ export class BoardService {
     if (board.ownerId !== userId)
       throw new ForbiddenException('Only the board owner can delete it');
 
-    // Delete image from MinIO
-    if (board.coverImage) {
-      await this.minioService.deleteFile(board.coverImage);
+    // Fetch all task attachments for this board to clean up MinIO
+    const attachments = await this.prismaService.taskAttachment.findMany({
+      where: {
+        task: {
+          column: {
+            boardId: id
+          }
+        }
+      }
+    });
+
+    // Delete task attachments from MinIO
+    for (const att of attachments) {
+      try {
+        await this.minioService.deleteFile(att.url);
+      } catch (e) {
+        console.error(`Failed to delete task attachment from MinIO: ${att.url}`, e);
+      }
     }
 
+    // Delete board cover image from MinIO
+    if (board.coverImage) {
+      try {
+        await this.minioService.deleteFile(board.coverImage);
+      } catch (e) {
+        console.error(`Failed to delete cover image from MinIO: ${board.coverImage}`, e);
+      }
+    }
+
+    // Prisma's onDelete: Cascade handles the transactional deletion of 
+    // columns, tasks, task_attachments, and board_members at the DB engine level.
     await this.prismaService.board.delete({ where: { id } });
 
     return { success: true };

@@ -39,23 +39,63 @@ export class TaskService {
 
   // Helper to check access via taskId
   private async verifyTaskAccess(taskId: string, userId: string) {
-    const task = await this.prisma.task.findUnique({ where: { id: taskId } });
+    const task = await this.prisma.task.findUnique({ 
+      where: { id: taskId },
+      include: { assignees: true }
+    });
     if (!task) throw new NotFoundException('Task not found');
-    await this.verifyColumnAccess(task.columnId, userId);
+    
+    const column = await this.verifyColumnAccess(task.columnId, userId);
+    
+    const isOwner = column.board.ownerId === userId;
+    const isAssigned = task.assignees.some(a => a.id === userId);
+    
+    if (!isOwner && !isAssigned) {
+      throw new ForbiddenException('You can only access tasks you are assigned to');
+    }
+    
     return task;
+  }
+
+  async findMyTasks(userId: string) {
+    return this.prisma.task.findMany({
+      where: {
+        assignees: { some: { id: userId } }
+      },
+      include: {
+        column: {
+          include: {
+            board: {
+              select: { id: true, title: true, coverImage: true }
+            }
+          }
+        },
+        assignees: { select: { id: true, name: true, photo: true } },
+        creator: { select: { id: true, name: true, photo: true } },
+        attachments: true,
+      },
+      orderBy: { createdAt: 'desc' }
+    });
   }
 
   async create(columnId: string, userId: string, dto: CreateTaskDto) {
     const column = await this.verifyColumnAccess(columnId, userId);
 
-    // If assigned, verify the assignee is actually a member of the board
-    if (dto.assigneeId) {
-      const isAssigneeOwner = column.board.ownerId === dto.assigneeId;
-      const isAssigneeMember = column.board.members.some(
-        (m) => m.userId === dto.assigneeId,
-      );
-      if (!isAssigneeOwner && !isAssigneeMember) {
-        throw new BadRequestException('Assignee must be a member of the board');
+    // Auto-assign the board owner AND the task creator
+    const finalAssigneeIds = new Set(dto.assigneeIds || []);
+    finalAssigneeIds.add(column.board.ownerId);
+    finalAssigneeIds.add(userId);
+
+    // If assigned, verify the assignees are actually members of the board
+    if (finalAssigneeIds.size > 0) {
+      for (const assigneeId of Array.from(finalAssigneeIds)) {
+        const isAssigneeOwner = column.board.ownerId === assigneeId;
+        const isAssigneeMember = column.board.members.some(
+          (m) => m.userId === assigneeId,
+        );
+        if (!isAssigneeOwner && !isAssigneeMember) {
+          throw new BadRequestException(`Assignee ${assigneeId} must be a member of the board`);
+        }
       }
     }
 
@@ -75,11 +115,14 @@ export class TaskService {
         description: dto.description,
         priority: dto.priority || 'MEDIUM',
         position,
-        assigneeId: dto.assigneeId,
         columnId,
+        creatorId: userId,
+        assignees: {
+          connect: Array.from(finalAssigneeIds).map(id => ({ id }))
+        }
       },
       include: {
-        assignee: { select: { id: true, name: true, photo: true } }
+        assignees: { select: { id: true, name: true, photo: true } }
       }
     });
 
@@ -105,12 +148,17 @@ export class TaskService {
       data: {
         title: dto.title,
         description: dto.description,
+        priority: dto.priority,
         position: dto.position,
         columnId: dto.columnId,
-        assigneeId: dto.assigneeId,
+        ...(dto.assigneeIds && {
+          assignees: {
+            set: dto.assigneeIds.map(id => ({ id }))
+          }
+        }),
       },
       include: {
-        assignee: { select: { id: true, name: true, photo: true } }
+        assignees: { select: { id: true, name: true, photo: true } }
       }
     });
 
@@ -120,7 +168,32 @@ export class TaskService {
 
   async remove(id: string, userId: string) {
     const task = await this.verifyTaskAccess(id, userId);
-    const column = await this.prisma.column.findUnique({ where: { id: task.columnId } });
+    const column = await this.prisma.column.findUnique({ 
+      where: { id: task.columnId },
+      include: { board: true }
+    });
+    
+    if (!column) throw new NotFoundException('Column not found');
+
+    const isOwner = column.board.ownerId === userId;
+    const isCreator = task.creatorId === userId;
+
+    if (!isOwner && !isCreator) {
+      throw new ForbiddenException('Only the board owner or the task creator can delete this task');
+    }
+
+    // Delete attachments from MinIO before deleting the task
+    const attachments = await this.prisma.taskAttachment.findMany({
+      where: { taskId: id }
+    });
+    
+    for (const att of attachments) {
+      try {
+        await this.minioService.deleteFile(att.url);
+      } catch (e) {
+        console.error(`Failed to delete file from MinIO: ${att.url}`, e);
+      }
+    }
 
     await this.prisma.task.delete({ where: { id } });
 
@@ -140,6 +213,14 @@ export class TaskService {
   ) {
     await this.verifyTaskAccess(taskId, userId);
     if (!file) throw new BadRequestException('No file provided');
+
+    const currentCount = await this.prisma.taskAttachment.count({
+      where: { taskId }
+    });
+
+    if (currentCount >= 3) {
+      throw new BadRequestException('A task can have a maximum of 3 attachments');
+    }
 
     const url = await this.minioService.uploadFile(file, 'task-attachments');
 

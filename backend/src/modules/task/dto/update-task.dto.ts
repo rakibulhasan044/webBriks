@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNumber, IsOptional, IsString } from 'class-validator';
+import { IsNumber, IsOptional, IsString, IsArray } from 'class-validator';
 
 export class UpdateTaskDto {
   @ApiProperty({ description: 'Title of the task', required: false })
@@ -16,6 +16,10 @@ export class UpdateTaskDto {
   @IsOptional()
   description?: string;
 
+  @ApiProperty({ description: 'Priority of the task', required: false })
+  @IsOptional()
+  priority?: 'LOW' | 'MEDIUM' | 'HIGH';
+
   @ApiProperty({ description: 'Position within the column', required: false })
   @IsNumber()
   @IsOptional()
@@ -31,10 +35,9 @@ export class UpdateTaskDto {
   @IsOptional()
   columnId?: string;
 
-  @ApiProperty({ description: 'Change assigned user ID', required: false })
-  @IsString({
-    message: 'Assignee ID must be a string',
-  })
+  @ApiProperty({ description: 'Change assigned user IDs', required: false, type: [String] })
+  @IsArray()
+  @IsString({ each: true, message: 'Each assignee ID must be a string' })
   @IsOptional()
-  assigneeId?: string;
+  assigneeIds?: string[];
 }

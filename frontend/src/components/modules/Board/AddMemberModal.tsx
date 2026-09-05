@@ -74,7 +74,7 @@ export function AddMemberModal({ children, boardId }: { children: React.ReactNod
       setIsOpen(open);
       if (!open) setErrors({});
     }}>
-      <DialogTrigger asChild render={children as any} />
+      <DialogTrigger render={children as any} />
       <DialogContent className="sm:max-w-[400px]">
         <DialogHeader>
           <DialogTitle>Add a Member</DialogTitle>

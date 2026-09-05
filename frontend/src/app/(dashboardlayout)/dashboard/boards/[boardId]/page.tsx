@@ -1,8 +1,9 @@
-import { Filter, Plus, UserPlus } from "lucide-react";
+import { Filter, Plus, UserPlus, Layout } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import BoardCanvas from "@/components/modules/Board/BoardCanvas";
 import { CreateTaskModal } from "@/components/modules/Board/CreateTaskModal";
 import { AddMemberModal } from "@/components/modules/Board/AddMemberModal";
+import { CreateColumnModal } from "@/components/modules/Board/CreateColumnModal";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { getImageUrl } from "@/lib/utils";
@@ -59,7 +60,7 @@ export default async function BoardsPage({ params }: { params: Promise<{ boardId
         priority: task.priority === "LOW" ? "Low" : task.priority === "MEDIUM" ? "Medium" : "High",
         comments: 0,
         attachments: task.attachments || [],
-        assignee: task.assignee
+        assignees: task.assignees || []
       })) || []
     };
   }) || [];
@@ -139,6 +140,12 @@ export default async function BoardsPage({ params }: { params: Promise<{ boardId
               <Filter className="w-4 h-4" />
               Filter
             </button>
+            <CreateColumnModal boardId={board.id}>
+              <button className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-slate-600 bg-white border border-slate-200 rounded-lg shadow-sm hover:bg-slate-50 transition-colors">
+                <Layout className="w-4 h-4" />
+                Add Column
+              </button>
+            </CreateColumnModal>
             <CreateTaskModal 
               columns={board.columns.map((c: any) => ({ id: c.id, title: c.title }))} 
               members={[board.owner, ...board.members.map((m: any) => m.user)].map(u => ({ id: u.id, name: u.name, photo: u.photo }))}
@@ -153,8 +160,9 @@ export default async function BoardsPage({ params }: { params: Promise<{ boardId
       </div>
 
       {/* Board Canvas Wrapper */}
-      <div className="flex-1 overflow-x-auto overflow-y-hidden p-6 md:p-8">
+      <div className="flex-1 overflow-x-auto overflow-y-hidden p-6 md:p-8 no-scrollbar">
         <BoardCanvas 
+          boardId={board.id}
           initialColumns={mappedColumns} 
           priorityStyles={priorityStyles} 
           members={[board.owner, ...board.members.map((m: any) => m.user)].map(u => ({ id: u.id, name: u.name, photo: u.photo }))}

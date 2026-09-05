@@ -156,6 +156,11 @@ instance.interceptors.response.use(
       }
     }
 
+    if (error.response?.data?.message) {
+      const serverMessage = error.response.data.message;
+      error.message = Array.isArray(serverMessage) ? serverMessage[0] : serverMessage;
+    }
+
     return Promise.reject(error);
   },
 );

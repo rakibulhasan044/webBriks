@@ -122,7 +122,7 @@ export function CreateBoardModal({ children }: { children: React.ReactNode }) {
 
   return (
     <Dialog open={isOpen} onOpenChange={handleOpenChange}>
-      <DialogTrigger asChild render={children as any} />
+      <DialogTrigger render={children as any} />
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>Create New Board</DialogTitle>

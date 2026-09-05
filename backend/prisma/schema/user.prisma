@@ -10,6 +10,7 @@ model User {
     ownedBoards   Board[]       @relation("BoardOwner")
     boardMembers  BoardMember[]
     assignedTasks Task[]        @relation("TaskAssignee")
+    createdTasks  Task[]        @relation("TaskCreator")
 
     @@map("users")
 }

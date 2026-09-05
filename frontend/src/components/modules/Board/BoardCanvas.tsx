@@ -10,16 +10,33 @@ import {
 import { MoreHorizontal, Plus, Paperclip, Loader2 } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { CreateTaskModal } from "./CreateTaskModal";
+import { EditTaskModal } from "./EditTaskModal";
 import { CreateColumnModal } from "./CreateColumnModal";
 import { getImageUrl } from "@/lib/utils";
 import { AvatarImage } from "@/components/ui/avatar";
 import { taskService } from "@/services/task.service";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Edit2, Trash2, AlertTriangle } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
-export default function BoardCanvas({ initialColumns, priorityStyles, members = [] }: any) {
+export default function BoardCanvas({ boardId, initialColumns, priorityStyles, members = [] }: any) {
   const [columns, setColumns] = useState(initialColumns);
   const [uploadingTaskId, setUploadingTaskId] = useState<string | null>(null);
+  const [taskToDelete, setTaskToDelete] = useState<{id: string, title: string} | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
 
@@ -54,13 +71,27 @@ export default function BoardCanvas({ initialColumns, priorityStyles, members = 
         toast.success("Attachment added successfully!");
         router.refresh();
       } else {
-        toast.error("Failed to upload attachment");
+        toast.error(res?.message || "Failed to upload attachment");
       }
-    } catch (error) {
-      toast.error("Failed to upload attachment");
+    } catch (error: any) {
+      toast.error(error?.message || "Failed to upload attachment");
     } finally {
       setUploadingTaskId(null);
       if (fileInputRef.current) fileInputRef.current.value = '';
+    }
+  };
+
+  const handleDeleteTask = async (taskId: string) => {
+    try {
+      const res = await taskService.deleteTask(taskId);
+      if (res.success) {
+        toast.success("Task deleted successfully");
+        router.refresh();
+      } else {
+        toast.error(res.message || "Failed to delete task");
+      }
+    } catch (error: any) {
+      toast.error(error.message || "You don't have permission to delete this task");
     }
   };
 
@@ -128,7 +159,7 @@ export default function BoardCanvas({ initialColumns, priorityStyles, members = 
                 <div
                   ref={provided.innerRef}
                   {...provided.droppableProps}
-                  className={`flex-1 overflow-y-auto overflow-x-hidden min-h-[150px] p-1.5 -mx-1.5 rounded-lg transition-colors duration-200 ${
+                  className={`flex-1 overflow-y-auto overflow-x-hidden min-h-[150px] p-1.5 -mx-1.5 rounded-lg transition-colors duration-200 no-scrollbar ${
                     snapshot.isDraggingOver ? "bg-slate-100/50" : "bg-transparent"
                   }`}
                 >
@@ -169,7 +200,7 @@ export default function BoardCanvas({ initialColumns, priorityStyles, members = 
                                 
                                 <button 
                                   onClick={() => document.getElementById(`upload-${task.id}`)?.click()}
-                                  className={`opacity-0 group-hover:opacity-100 p-1 hover:bg-black/5 rounded transition-all ${styles.icon}`}
+                                  className={`p-1 hover:bg-black/5 rounded transition-all ${styles.icon}`}
                                   title="Add Attachment"
                                 >
                                   {uploadingTaskId === task.id ? (
@@ -178,11 +209,30 @@ export default function BoardCanvas({ initialColumns, priorityStyles, members = 
                                     <Paperclip className="w-4 h-4" />
                                   )}
                                 </button>
-                                <button
-                                  className={`opacity-0 group-hover:opacity-100 p-1 hover:bg-black/5 rounded transition-all ${styles.icon}`}
-                                >
-                                  <MoreHorizontal className="w-4 h-4" />
-                                </button>
+                                
+                                <DropdownMenu>
+                                  <DropdownMenuTrigger render={
+                                    <button
+                                      className={`p-1 hover:bg-black/5 rounded transition-all ${styles.icon}`}
+                                      title="Task Options"
+                                    >
+                                      <MoreHorizontal className="w-4 h-4" />
+                                    </button>
+                                  } />
+                                  <DropdownMenuContent align="end" className="w-40 bg-white/95 backdrop-blur-md border border-slate-200/50 shadow-lg">
+                                    {/* In the future, we could add an EditTaskModal here */}
+                                    <EditTaskModal task={task} columns={columns} members={members}>
+                                      <DropdownMenuItem onSelect={(e) => e.preventDefault()} className="cursor-pointer">
+                                        <Edit2 className="w-4 h-4 mr-2 text-slate-500" />
+                                        Edit Task
+                                      </DropdownMenuItem>
+                                    </EditTaskModal>
+                                    <DropdownMenuItem onClick={() => setTaskToDelete({ id: task.id, title: task.title })} className="text-red-600 focus:text-red-700 focus:bg-red-50">
+                                      <Trash2 className="w-4 h-4 mr-2" />
+                                      Delete Task
+                                    </DropdownMenuItem>
+                                  </DropdownMenuContent>
+                                </DropdownMenu>
                               </div>
                             </div>
 
@@ -228,15 +278,17 @@ export default function BoardCanvas({ initialColumns, priorityStyles, members = 
                               </div>
 
                               <div className="flex items-center -space-x-1.5">
-                                {task.assignee ? (
-                                  <Avatar className="h-6 w-6 border-2 border-white shadow-sm bg-white">
-                                    {task.assignee.photo && <AvatarImage src={getImageUrl(task.assignee.photo) as string} />}
-                                    <AvatarFallback className="bg-indigo-100 text-indigo-700 text-[10px] font-bold">
-                                      {task.assignee.name?.charAt(0) || "U"}
-                                    </AvatarFallback>
-                                  </Avatar>
+                                {task.assignees && task.assignees.length > 0 ? (
+                                  task.assignees.map((assignee: any) => (
+                                    <Avatar key={assignee.id} className="h-6 w-6 border-2 border-white shadow-sm bg-white" title={assignee.name}>
+                                      {assignee.photo && <AvatarImage src={getImageUrl(assignee.photo) as string} />}
+                                      <AvatarFallback className="bg-indigo-100 text-indigo-700 text-[10px] font-bold">
+                                        {assignee.name?.charAt(0) || "U"}
+                                      </AvatarFallback>
+                                    </Avatar>
+                                  ))
                                 ) : (
-                                  <div className="h-6 w-6 rounded-full border-2 border-white shadow-sm bg-slate-50 flex items-center justify-center border-dashed border-slate-300">
+                                  <div className="h-6 w-6 rounded-full border-2 border-white shadow-sm bg-slate-50 flex items-center justify-center border-dashed border-slate-300" title="Unassigned">
                                     <span className="text-[10px] font-bold text-slate-400">?</span>
                                   </div>
                                 )}
@@ -262,16 +314,39 @@ export default function BoardCanvas({ initialColumns, priorityStyles, members = 
           </div>
         ))}
 
-        {/* Add Column Button */}
-        <div className="flex-shrink-0 w-80">
-          <CreateColumnModal>
-            <button className="w-full py-3 px-4 flex items-center gap-2 text-sm font-medium text-slate-500 bg-white/50 hover:bg-white border-2 border-slate-200/50 hover:border-slate-300 rounded-xl transition-all shadow-sm">
-              <Plus className="w-5 h-5" />
-              Add new column
-            </button>
-          </CreateColumnModal>
-        </div>
+
       </div>
+
+      <Dialog open={!!taskToDelete} onOpenChange={(open) => !open && setTaskToDelete(null)}>
+        <DialogContent className="sm:max-w-md bg-white/95 backdrop-blur-xl border border-slate-200/60 shadow-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-red-600">
+              <AlertTriangle className="w-5 h-5" />
+              Delete Task
+            </DialogTitle>
+            <DialogDescription className="pt-2 text-slate-500 leading-relaxed">
+              Are you sure you want to delete <strong className="font-semibold text-slate-700">"{taskToDelete?.title}"</strong>? This action cannot be undone and will permanently remove the task and its attachments.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex justify-end gap-3 mt-4">
+            <button 
+              onClick={() => setTaskToDelete(null)} 
+              className="px-4 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors shadow-sm"
+            >
+              Cancel
+            </button>
+            <button 
+              onClick={() => {
+                if(taskToDelete) handleDeleteTask(taskToDelete.id);
+                setTaskToDelete(null);
+              }} 
+              className="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 transition-colors shadow-sm"
+            >
+              Delete
+            </button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </DragDropContext>
   );
 }

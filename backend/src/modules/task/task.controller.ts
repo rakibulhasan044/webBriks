@@ -8,6 +8,7 @@ import {
   UseGuards,
   UseInterceptors,
   UploadedFile,
+  Get,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiBearerAuth, ApiTags, ApiConsumes } from '@nestjs/swagger';
@@ -24,6 +25,12 @@ import { ResponseMessage } from '../../common/decorators/response-message.decora
 @Controller()
 export class TaskController {
   constructor(private readonly taskService: TaskService) {}
+
+  @Get('tasks')
+  @ResponseMessage('Tasks fetched successfully')
+  findMyTasks(@CurrentUserId() userId: string) {
+    return this.taskService.findMyTasks(userId);
+  }
 
   @Post('columns/:columnId/tasks')
   @ResponseMessage('Task created successfully')

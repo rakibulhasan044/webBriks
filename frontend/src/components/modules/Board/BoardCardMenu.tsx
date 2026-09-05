@@ -133,11 +133,11 @@ export function BoardCardMenu({ board }: { board: any }) {
   return (
     <>
       <DropdownMenu>
-        <DropdownMenuTrigger asChild>
+        <DropdownMenuTrigger render={
           <button className="p-1.5 rounded-full bg-white/80 backdrop-blur-md hover:bg-white text-slate-700 shadow-sm transition-all border border-white/20" aria-label="Board Options">
             <MoreVertical className="w-5 h-5" />
           </button>
-        </DropdownMenuTrigger>
+        } />
         <DropdownMenuContent align="end" className="w-48 bg-white/30 backdrop-blur-xl border border-slate-200/40 shadow-xl">
           <DropdownMenuItem onClick={() => router.push(`/dashboard/boards/${board.id}`)}>
             <Eye className="w-4 h-4 mr-2 text-slate-500" />
@@ -170,7 +170,7 @@ export function BoardCardMenu({ board }: { board: any }) {
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
             <DialogTitle>Edit Board</DialogTitle>
-            <DialogDescription>Update your board's details and cover image.</DialogDescription>
+            <DialogDescription>Update your board&apos;s details and cover image.</DialogDescription>
           </DialogHeader>
           
           <form onSubmit={handleEditSubmit}>

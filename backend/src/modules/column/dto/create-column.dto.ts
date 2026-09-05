@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEnum, IsNotEmpty, IsNumber } from 'class-validator';
+import { IsEnum, IsNotEmpty, IsNumber, IsOptional } from 'class-validator';
 import { ColumnTitle } from '../../../generated/prisma/enums';
 
 export class CreateColumnDto {
@@ -19,10 +19,9 @@ export class CreateColumnDto {
   @ApiProperty({
     description: 'Position of the column (fractional index)',
     example: 1000,
+    required: false,
   })
   @IsNumber()
-  @IsNotEmpty({
-    message: 'Position can not be empty',
-  })
-  position!: number;
+  @IsOptional()
+  position?: number;
 }
