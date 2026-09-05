@@ -8,7 +8,7 @@ const getTokenSecondsRemaining = (token: string): number => {
   try {
     const tokenPayload = jwt.decode(token) as JwtPayload;
 
-    if (tokenPayload && !tokenPayload.exp) {
+    if (!tokenPayload || !tokenPayload.exp) {
       return 0;
     }
 
@@ -29,7 +29,7 @@ export const setTokenInCookies = async (
 ) => {
   let maxAgeInSeconds;
 
-  if (name !== "better-auth.session_token") {
+  if (name !== "better-auth.session_token" && name !== "currentUser") {
     maxAgeInSeconds = getTokenSecondsRemaining(token);
   }
 

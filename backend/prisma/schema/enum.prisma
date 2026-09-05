@@ -2,3 +2,9 @@ enum BoardRole {
     OWNER
     MEMBER
 }
+
+enum TaskPriority {
+    LOW
+    MEDIUM
+    HIGH
+}

@@ -88,7 +88,18 @@ export class BoardService {
             },
           },
         },
-        columns: { orderBy: { position: 'asc' } },
+        columns: { 
+          orderBy: { position: 'asc' },
+          include: {
+            tasks: {
+              orderBy: { position: 'asc' },
+              include: {
+                assignee: { select: { id: true, name: true, email: true, photo: true } },
+                attachments: true,
+              }
+            }
+          }
+        },
       },
     });
 
