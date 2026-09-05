@@ -33,6 +33,9 @@ export const loginAction = async (
       if (response.data.refreshToken) {
         await setTokenInCookies("refreshToken", response.data.refreshToken, 7 * 24 * 60 * 60); // 7 days fallback
       }
+      if (response.data.user) {
+        await setTokenInCookies("currentUser", JSON.stringify(response.data.user), 7 * 24 * 60 * 60);
+      }
     }
 
     return response;

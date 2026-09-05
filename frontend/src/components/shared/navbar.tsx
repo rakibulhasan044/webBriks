@@ -1,6 +1,20 @@
 import Link from "next/link";
+import { cookies } from "next/headers";
+import { UserNavAction } from "./user-nav-action";
 
-export function Navbar() {
+export async function Navbar() {
+  const cookieStore = await cookies();
+  const userCookie = cookieStore.get("currentUser")?.value;
+  let user = null;
+
+  if (userCookie) {
+    try {
+      user = JSON.parse(userCookie);
+    } catch (e) {
+      console.error("Failed to parse user cookie", e);
+    }
+  }
+
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -41,12 +55,7 @@ export function Navbar() {
 
           {/* Action Buttons */}
           <div className="flex items-center gap-4">
-            <Link
-              href="/login"
-              className="px-5 py-2 text-sm font-medium bg-slate-900 text-white rounded-lg shadow-sm hover:bg-slate-800 transition-colors"
-            >
-              Log in
-            </Link>
+            <UserNavAction user={user} />
           </div>
         </div>
       </div>

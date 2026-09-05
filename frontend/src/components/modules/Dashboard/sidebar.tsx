@@ -5,21 +5,23 @@ import { usePathname } from "next/navigation";
 import { 
   LayoutDashboard, 
   KanbanSquare, 
-  Users, 
+  CheckSquare, 
   Settings, 
   LogOut,
-  Hexagon
+  Hexagon,
+  User
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 const navigation = [
   { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
   { name: "My Boards", href: "/dashboard/boards", icon: KanbanSquare },
-  { name: "Members", href: "/dashboard/members", icon: Users },
+  { name: "My Tasks", href: "/dashboard/tasks", icon: CheckSquare },
   { name: "Settings", href: "/dashboard/settings", icon: Settings },
 ];
 
-export function Sidebar() {
+export function Sidebar({ user }: { user?: any }) {
   const pathname = usePathname();
 
   return (
@@ -68,20 +70,26 @@ export function Sidebar() {
       {/* User Profile / Logout Bottom Section */}
       <div className="border-t border-slate-200 p-4">
         <div className="flex items-center gap-3 mb-4 px-2">
-          <div className="h-9 w-9 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-700 font-bold text-sm border border-indigo-200">
-            JD
-          </div>
-          <div className="flex flex-col">
-            <span className="text-sm font-semibold text-slate-900">John Doe</span>
-            <span className="text-xs text-slate-500">john@example.com</span>
+          <Avatar className="h-9 w-9 border border-slate-200 shadow-sm">
+            {user?.photo && typeof user.photo === 'string' && user.photo !== "null" && (
+              <AvatarImage src={user.photo} alt="Avatar" className="object-cover" />
+            )}
+            <AvatarFallback className="bg-indigo-50 text-indigo-500">
+              <User className="h-4 w-4" />
+            </AvatarFallback>
+          </Avatar>
+
+          <div className="flex flex-col overflow-hidden">
+            <span className="text-sm font-semibold text-slate-900 truncate">{user?.name || "User"}</span>
+            <span className="text-xs text-slate-500 truncate">{user?.email || "email@example.com"}</span>
           </div>
         </div>
         
         <button 
           onClick={() => {
-            // Logout logic will go here
             document.cookie = "accessToken=; path=/; max-age=0";
             document.cookie = "refreshToken=; path=/; max-age=0";
+            document.cookie = "currentUser=; path=/; max-age=0";
             window.location.href = "/login";
           }}
           className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-red-600 hover:bg-red-50 transition-colors"

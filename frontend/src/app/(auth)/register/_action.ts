@@ -41,6 +41,9 @@ export const registerAction = async (
           if (loginResponse.data.refreshToken) {
             await setTokenInCookies("refreshToken", loginResponse.data.refreshToken, 7 * 24 * 60 * 60);
           }
+          if (loginResponse.data.user) {
+            await setTokenInCookies("currentUser", JSON.stringify(loginResponse.data.user), 7 * 24 * 60 * 60);
+          }
         }
       } catch (loginError) {
         console.error("Auto-login failed after registration:", loginError);
