@@ -13,10 +13,10 @@ import { useForm } from "@tanstack/react-form";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 export default function LoginForm() {
   const router = useRouter();
-  const [serverError, setServerError] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
 
   const { mutateAsync, isPending } = useMutation({
@@ -29,20 +29,19 @@ export default function LoginForm() {
       password: "",
     },
     onSubmit: async ({ value }) => {
-      setServerError(null);
       try {
         const result = (await mutateAsync(value)) as any;
 
         if (!result.success) {
-          setServerError(result.message || "Login failed");
+          toast.error(result.message || "Invalid credentials");
           return;
         }
 
+        toast.success(result.message || "Successfully logged in!");
         // Successfully logged in! Redirect to dashboard or home
-        router.push("/");
+        router.push("/dashboard"); // Now redirects to dashboard because / is public
       } catch (error: any) {
-        console.log(`Login failed: ${error.message}`);
-        setServerError(`Login failed: ${error.message}`);
+        toast.error(`Login failed: ${error.message}`);
       }
     },
   });
@@ -63,11 +62,6 @@ export default function LoginForm() {
           form.handleSubmit();
         }}
       >
-        {serverError && (
-          <div className="p-3 text-sm text-red-500 bg-red-50 rounded-lg border border-red-100">
-            {serverError}
-          </div>
-        )}
 
         <form.Field
           name="email"

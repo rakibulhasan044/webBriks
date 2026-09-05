@@ -27,9 +27,12 @@ export const loginAction = async (
       parsedPayload.data,
     );
 
-    // Save token to cookies using the custom tokenUtils so it auto-calculates maxAge!
-    if (response.success && response.data?.token) {
-      await setTokenInCookies("accessToken", response.data.token);
+    // Save tokens to cookies using the custom tokenUtils so it auto-calculates maxAge!
+    if (response.success && response.data?.accessToken) {
+      await setTokenInCookies("accessToken", response.data.accessToken);
+      if (response.data.refreshToken) {
+        await setTokenInCookies("refreshToken", response.data.refreshToken, 7 * 24 * 60 * 60); // 7 days fallback
+      }
     }
 
     return response;

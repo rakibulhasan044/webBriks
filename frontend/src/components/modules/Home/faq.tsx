@@ -41,7 +41,7 @@ function FaqItem({ faq, index }: { faq: any, index: number }) {
     <motion.div 
       initial={{ opacity: 0, y: 20 }}
       whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: "-50px" }}
+      viewport={{ once: true, amount: 0.1 }}
       transition={{ delay: index * 0.1 }}
       className="border border-slate-200 rounded-2xl overflow-hidden bg-slate-50/50"
     >

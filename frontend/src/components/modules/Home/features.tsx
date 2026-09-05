@@ -58,7 +58,7 @@ export function FeaturesSection() {
         <motion.div 
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-100px" }}
+          viewport={{ once: true, amount: 0.1 }}
           transition={{ duration: 0.6 }}
           className="text-center max-w-2xl mx-auto mb-20"
         >
@@ -77,7 +77,7 @@ export function FeaturesSection() {
               key={i} 
               initial={{ opacity: 0, y: 40 }}
               whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-50px" }}
+              viewport={{ once: true, amount: 0.1 }}
               transition={{ duration: 0.5, delay: i * 0.1 }}
               whileHover={{ y: -5, transition: { duration: 0.2 } }}
               className="p-8 rounded-[2rem] border border-slate-100 bg-white shadow-xl shadow-slate-200/40 relative overflow-hidden group"

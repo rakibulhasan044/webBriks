@@ -35,9 +35,12 @@ export const registerAction = async (
           password: parsedPayload.data.password,
         });
 
-        // 3. Save the token to cookies using custom tokenUtils
-        if (loginResponse.success && loginResponse.data?.token) {
-          await setTokenInCookies("accessToken", loginResponse.data.token);
+        // 3. Save the tokens to cookies using custom tokenUtils
+        if (loginResponse.success && loginResponse.data?.accessToken) {
+          await setTokenInCookies("accessToken", loginResponse.data.accessToken);
+          if (loginResponse.data.refreshToken) {
+            await setTokenInCookies("refreshToken", loginResponse.data.refreshToken, 7 * 24 * 60 * 60);
+          }
         }
       } catch (loginError) {
         console.error("Auto-login failed after registration:", loginError);

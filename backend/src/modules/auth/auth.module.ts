@@ -9,7 +9,7 @@ import { JwtStrategy } from '../../common/strategy/jwt.strategy';
     JwtModule.register({
       global: true,
       secret: process.env.JWT_SECRET || 'super-secret-fallback-key',
-      signOptions: { expiresIn: '1d' },
+      signOptions: { expiresIn: '15m' }, // Access token expires in 15 minutes
     }),
   ],
   controllers: [AuthController],

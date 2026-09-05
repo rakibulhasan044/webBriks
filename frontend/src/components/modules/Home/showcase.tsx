@@ -13,7 +13,7 @@ export function ShowcaseSection() {
           <motion.div
             initial={{ opacity: 0, x: -50 }}
             whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true, margin: "-100px" }}
+            viewport={{ once: true, amount: 0.1 }}
             transition={{ duration: 0.7, ease: "easeOut" }}
           >
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-50 border border-purple-100 text-sm font-medium text-purple-600 mb-6 shadow-sm">
@@ -49,7 +49,7 @@ export function ShowcaseSection() {
           <motion.div 
             initial={{ opacity: 0, scale: 0.9, rotate: -2 }}
             whileInView={{ opacity: 1, scale: 1, rotate: 0 }}
-            viewport={{ once: true, margin: "-100px" }}
+            viewport={{ once: true, amount: 0.1 }}
             transition={{ duration: 0.8, type: "spring", bounce: 0.4 }}
             className="relative"
           >

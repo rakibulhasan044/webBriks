@@ -63,10 +63,23 @@ export class AuthService {
     };
   }
 
+  private async generateTokens(userId: string, email: string) {
+    const payload = { sub: userId, email };
+    
+    const [accessToken, refreshToken] = await Promise.all([
+      this.jwtService.signAsync(payload), // Uses default 15m and JWT_SECRET
+      this.jwtService.signAsync(payload, {
+        secret: process.env.JWT_REFRESH_SECRET || 'super-refresh-secret',
+        expiresIn: '7d',
+      }),
+    ]);
+
+    return { accessToken, refreshToken };
+  }
+
   async login(loginDto: LoginDto) {
     const { email, password } = loginDto;
 
-    // Find the user
     const user = await this.prismaService.user.findUnique({
       where: { email },
     });
@@ -75,19 +88,18 @@ export class AuthService {
       throw new UnauthorizedException('Invalid credentials');
     }
 
-    // Compare passwords
     const isPasswordValid = await bcrypt.compare(password, user.passwordHash);
 
     if (!isPasswordValid) {
       throw new UnauthorizedException('Invalid credentials');
     }
 
-    // Generate JWT token
-    const payload = { sub: user.id, email: user.email };
-    const token = await this.jwtService.signAsync(payload);
+    const tokens = await this.generateTokens(user.id, user.email);
 
     return {
-      token,
+      token: tokens.accessToken, // Keeping 'token' for backwards compatibility, but also returning accessToken explicitly
+      accessToken: tokens.accessToken,
+      refreshToken: tokens.refreshToken,
       user: {
         id: user.id,
         name: user.name,
@@ -95,6 +107,35 @@ export class AuthService {
         photo: user.photo,
       },
     };
+  }
+
+  async refresh(refreshToken: string) {
+    try {
+      // Verify refresh token
+      const payload = await this.jwtService.verifyAsync(refreshToken, {
+        secret: process.env.JWT_REFRESH_SECRET || 'super-refresh-secret',
+      });
+
+      // Ensure user still exists
+      const user = await this.prismaService.user.findUnique({
+        where: { id: payload.sub },
+      });
+
+      if (!user) {
+        throw new UnauthorizedException('User no longer exists');
+      }
+
+      // Generate new tokens
+      const tokens = await this.generateTokens(user.id, user.email);
+
+      return {
+        token: tokens.accessToken,
+        accessToken: tokens.accessToken,
+        refreshToken: tokens.refreshToken,
+      };
+    } catch (error) {
+      throw new UnauthorizedException('Invalid or expired refresh token');
+    }
   }
 
   async getAllUsers(paginateParams: PaginateParams) {

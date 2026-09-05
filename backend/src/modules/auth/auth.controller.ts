@@ -48,6 +48,16 @@ export class AuthController {
     return this.authService.login(loginDto);
   }
 
+  @Post('refresh')
+  @HttpCode(HttpStatus.OK)
+  @ResponseMessage('Tokens refreshed successfully')
+  async refresh(@Body('refreshToken') refreshToken: string) {
+    if (!refreshToken) {
+      throw new Error('Refresh token is required'); // Or BadRequestException, handled by global filters
+    }
+    return this.authService.refresh(refreshToken);
+  }
+
   @Get('users')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()

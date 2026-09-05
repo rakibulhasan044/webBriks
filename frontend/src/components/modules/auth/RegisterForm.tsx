@@ -13,10 +13,10 @@ import { useForm } from "@tanstack/react-form";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 export default function RegisterForm() {
   const router = useRouter();
-  const [serverError, setServerError] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
 
   const { mutateAsync, isPending } = useMutation({
@@ -30,19 +30,19 @@ export default function RegisterForm() {
       password: "",
     },
     onSubmit: async ({ value }) => {
-      setServerError(null);
       try {
         const result = (await mutateAsync(value)) as any;
 
         if (!result.success) {
-          setServerError(result.message || "Registration failed");
+          toast.error(result.message || "Registration failed");
           return;
         }
 
+        toast.success(result.message || "Account created successfully!");
         // Successfully registered and auto-logged in!
-        router.push("/");
+        router.push("/dashboard");
       } catch (error: any) {
-        setServerError(`Registration failed: ${error.message}`);
+        toast.error(`Registration failed: ${error.message}`);
       }
     },
   });
@@ -63,11 +63,6 @@ export default function RegisterForm() {
           form.handleSubmit();
         }}
       >
-        {serverError && (
-          <div className="p-3 text-sm text-red-500 bg-red-50 rounded-lg border border-red-100">
-            {serverError}
-          </div>
-        )}
 
         <form.Field
           name="name"
