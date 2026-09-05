@@ -1,19 +1,7 @@
 version: '3.8'
 
 services:
-  # 1. PostgreSQL Database
-  postgres:
-    image: postgres:15-alpine
-    container_name: webbriks_db
-    restart: always
-    env_file:
-      - .env
-    ports:
-      - "5433:5432"
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-
-  # 2. MinIO (File Storage)
+  # 1. MinIO (File Storage)
   minio:
     image: minio/minio:latest
     container_name: webbriks_minio
@@ -27,7 +15,7 @@ services:
       - minio_data:/data
     command: server /data --console-address ":9001"
 
-  # 3. NestJS Backend
+  # 2. NestJS Backend
   backend:
     build:
       context: ./backend
@@ -40,7 +28,6 @@ services:
       - .env
     environment:
       # These override the .env file for the docker container to use internal networking
-      - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}?schema=public
       - MINIO_ENDPOINT=minio
     volumes:
       # Mount your local code into the container for instant hot-reloading
@@ -49,10 +36,9 @@ services:
       - /usr/src/app/node_modules
     command: sh -c "npx prisma generate && npx prisma db push --accept-data-loss && npm run start:dev"
     depends_on:
-      - postgres
       - minio
 
-  # 4. Next.js Frontend (Commented out until you build it)
+  # 3. Next.js Frontend (Commented out until you build it)
   # frontend:
   #   build:
   #     context: ./frontend
@@ -66,5 +52,4 @@ services:
   #     - backend
 
 volumes:
-  postgres_data:
   minio_data:

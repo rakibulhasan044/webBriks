@@ -1,7 +1,6 @@
 export function KanbanArt() {
   return (
     <div className="absolute inset-0 w-full h-full flex items-center justify-center">
-      
       {/* Background Layer: Soft Grid & Gradient */}
       <div className="absolute inset-0 bg-[#E8EEF2] bg-[radial-gradient(#CBD5E1_1px,transparent_1px)] [background-size:20px_20px]"></div>
 
@@ -21,7 +20,7 @@ export function KanbanArt() {
             </div>
           </div>
         </div>
-        
+
         {/* Column 2 */}
         <div className="flex-1 bg-white/60 backdrop-blur-md rounded-2xl p-4 shadow-sm border border-white/50 mt-8">
           <div className="w-12 h-2 bg-pink-200 rounded-full mb-4"></div>
@@ -44,13 +43,31 @@ export function KanbanArt() {
         >
           <defs>
             <filter id="shadow-1" x="-20%" y="-20%" width="140%" height="140%">
-              <feDropShadow dx="15" dy="0" stdDeviation="25" floodColor="#000000" floodOpacity="0.08" />
+              <feDropShadow
+                dx="15"
+                dy="0"
+                stdDeviation="25"
+                floodColor="#000000"
+                floodOpacity="0.08"
+              />
             </filter>
             <filter id="shadow-2" x="-20%" y="-20%" width="140%" height="140%">
-              <feDropShadow dx="10" dy="0" stdDeviation="15" floodColor="#000000" floodOpacity="0.06" />
+              <feDropShadow
+                dx="10"
+                dy="0"
+                stdDeviation="15"
+                floodColor="#000000"
+                floodOpacity="0.06"
+              />
             </filter>
             <filter id="shadow-3" x="-20%" y="-20%" width="140%" height="140%">
-              <feDropShadow dx="5" dy="0" stdDeviation="8" floodColor="#000000" floodOpacity="0.04" />
+              <feDropShadow
+                dx="5"
+                dy="0"
+                stdDeviation="8"
+                floodColor="#000000"
+                floodOpacity="0.04"
+              />
             </filter>
           </defs>
 
@@ -60,7 +77,7 @@ export function KanbanArt() {
             fill="#F1F5F9"
             filter="url(#shadow-1)"
           />
-          
+
           {/* Layer 2 */}
           <path
             d="M 0,0 L 200,0 C 280,180 120,380 250,500 C 380,620 150,820 280,1000 L 0,1000 Z"
@@ -76,7 +93,6 @@ export function KanbanArt() {
           />
         </svg>
       </div>
-
     </div>
   );
 }
