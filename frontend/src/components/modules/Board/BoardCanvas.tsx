@@ -398,6 +398,8 @@ export default function BoardCanvas({
     }
   };
 
+  console.log("column", columns);
+
   return (
     <div className="flex flex-col h-full">
       {/* Search Bar */}
@@ -423,6 +425,7 @@ export default function BoardCanvas({
       </div>
       <div className="flex gap-6 h-full pb-4">
         {columns.map((col: any, colIndex: number) => {
+          {console.log("col",col)}
           // Assign a unique pastel theme to each column
           const columnThemes = [
             {

@@ -1,6 +1,18 @@
 @echo off
+echo Cleaning up corrupted Docker cache (this prevents EOF errors)...
+docker system prune -f
+
+echo.
+echo Building Backend (Sequential Build to prevent memory crash)...
+docker compose build backend
+
+echo.
+echo Building Frontend (Sequential Build to prevent memory crash)...
+docker compose build frontend
+
+echo.
 echo Starting WebBriks Docker containers...
-docker compose up -d --build
+docker compose up -d
 
 echo.
 echo ==========================================
