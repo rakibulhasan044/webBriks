@@ -23,8 +23,7 @@ async function getCachedBoards(search: string) {
   }
 
   const queryParam = search ? `?search=${encodeURIComponent(search)}` : "";
-  const baseUrl =
-    process.env.NEXT_PUBLIC_API_BASE_URL || "http://127.0.0.1:6001/api/v1";
+  const baseUrl = process.env.INTERNAL_API_URL || process.env.NEXT_PUBLIC_API_BASE_URL || "http://127.0.0.1:6001/api/v1";
 
   const res = await fetch(`${baseUrl}/boards${queryParam}`, {
     headers: {

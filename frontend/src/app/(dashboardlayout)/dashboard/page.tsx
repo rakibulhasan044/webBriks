@@ -33,7 +33,7 @@ async function fetchDashboardData() {
   }
 
   const baseUrl =
-    process.env.NEXT_PUBLIC_API_BASE_URL || "http://127.0.0.1:6001/api/v1";
+    process.env.INTERNAL_API_URL || process.env.NEXT_PUBLIC_API_BASE_URL || "http://127.0.0.1:6001/api/v1";
 
   // Fetch boards and tasks in parallel
   const [boardsRes, tasksRes] = await Promise.all([
@@ -337,6 +337,7 @@ export default async function DashboardPage() {
                         src={getImageUrl(board.coverImage) as string}
                         alt={board.title}
                         fill
+                        unoptimized={true}
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
                       />
                     ) : (

@@ -2,10 +2,10 @@ import { NextRequest, NextResponse } from "next/server";
 
 const AUTH_ROUTES = ["/login", "/register"];
 const PUBLIC_ROUTES = ["/"];
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
+const API_BASE_URL = process.env.INTERNAL_API_URL || process.env.NEXT_PUBLIC_API_BASE_URL;
 
 if(!API_BASE_URL) {
-  throw new Error("NEXT_PUBLIC_API_BASE_URL is not defined in the env")
+  throw new Error("API_BASE_URL is not defined in the env")
 }
 
 // Simple Edge-compatible JWT decoder

@@ -69,7 +69,7 @@ export class AuthService {
     const [accessToken, refreshToken] = await Promise.all([
       this.jwtService.signAsync(payload), // Uses default 15m and JWT_SECRET
       this.jwtService.signAsync(payload, {
-        secret: process.env.JWT_REFRESH_SECRET || 'super-refresh-secret',
+        secret: process.env.JWT_REFRESH_SECRET!,
         expiresIn: '7d',
       }),
     ]);
@@ -113,7 +113,7 @@ export class AuthService {
     try {
       // Verify refresh token
       const payload = await this.jwtService.verifyAsync(refreshToken, {
-        secret: process.env.JWT_REFRESH_SECRET || 'super-refresh-secret',
+        secret: process.env.JWT_REFRESH_SECRET!,
       });
 
       // Ensure user still exists

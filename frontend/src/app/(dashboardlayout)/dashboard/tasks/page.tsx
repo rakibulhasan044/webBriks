@@ -17,8 +17,7 @@ async function getMyTasks() {
 
   if (!token) redirect("/login");
 
-  const baseUrl =
-    process.env.NEXT_PUBLIC_API_BASE_URL || "http://127.0.0.1:6001/api/v1";
+  const baseUrl = process.env.INTERNAL_API_URL || process.env.NEXT_PUBLIC_API_BASE_URL || "http://127.0.0.1:6001/api/v1";
 
   const res = await fetch(`${baseUrl}/tasks`, {
     headers: { Authorization: `Bearer ${token}` },

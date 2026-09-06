@@ -3,7 +3,7 @@ import { ApiResponse, PaginatedResponse } from "@/types/api.types";
 import { ILoginResponse } from "@/types/auth.types";
 import axios, { AxiosError, InternalAxiosRequestConfig } from "axios";
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
+const API_BASE_URL = process.env.INTERNAL_API_URL || process.env.NEXT_PUBLIC_API_BASE_URL;
 if (!API_BASE_URL) {
   throw new Error("API_BASE_URL is not defined");
 }

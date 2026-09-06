@@ -18,7 +18,7 @@ async function getBoard(id: string) {
   if (!token) redirect("/login");
 
   const baseUrl =
-    process.env.NEXT_PUBLIC_API_BASE_URL || "http://127.0.0.1:6001/api/v1";
+    process.env.INTERNAL_API_URL || process.env.NEXT_PUBLIC_API_BASE_URL || "http://127.0.0.1:6001/api/v1";
 
   const res = await fetch(`${baseUrl}/boards/${id}`, {
     headers: { Authorization: `Bearer ${token}` },

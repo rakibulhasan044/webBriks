@@ -38,6 +38,42 @@ async function bootstrap() {
   setupGlobalConfig(app);
 
   setupSwagger(app);
+
+  // Graceful shutdown handlers
+  process.on('SIGTERM', () => {
+    console.log('SIGTERM received, shutting down gracefully...');
+
+    (async () => {
+      await app.close();
+      process.exit(0);
+    })().catch((error) => {
+      console.error('Error during graceful shutdown:', error);
+      process.exit(1);
+    });
+  });
+
+  process.on('SIGINT', () => {
+    console.log('SIGINT received, shutting down gracefully...');
+
+    (async () => {
+      await app.close();
+      process.exit(0);
+    })().catch((error) => {
+      console.error('Error during graceful shutdown:', error);
+      process.exit(1);
+    });
+  });
+
+  process.on('uncaughtException', (error) => {
+    console.error('Uncaught Exception:', error);
+    process.exit(1);
+  });
+
+  process.on('unhandledRejection', (reason, promise) => {
+    console.error('Unhandled Rejection at:', promise, 'reason:', reason);
+    process.exit(1);
+  });
+
   await app.listen(port, '0.0.0.0');
 
   console.log(`🚀 Server is running on: ${domainWithPort}`);
@@ -49,4 +85,8 @@ async function bootstrap() {
     console.log(`🌍 Environment: ${nodeEnv}`);
   }
 }
-bootstrap();
+
+bootstrap().catch((error) => {
+  console.error('❌ Error starting the application:', error);
+  process.exit(1);
+});
