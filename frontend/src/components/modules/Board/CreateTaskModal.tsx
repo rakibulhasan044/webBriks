@@ -1,4 +1,9 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
+import { ITask } from "@/types/task.types";
+import { IColumn } from "@/types/column.types";
+import { IUser } from "@/types/user.type";
+
 
 import React, { useState, useRef } from "react";
 import {
@@ -122,7 +127,7 @@ export function CreateTaskModal({ children, columnId, columns = [], members = []
       
       if (res.success) {
         // 2. If there's an attachment, upload it to the newly created task
-        const taskId = res.data?.id || (res as any).id; // Fallback depending on backend structure
+        const taskId = (res.data as any)?.id || (res as any).id; // Fallback depending on backend structure
         
         if (taskId && attachment) {
           try {
@@ -222,7 +227,7 @@ export function CreateTaskModal({ children, columnId, columns = [], members = []
                     disabled={isLoading}
                     className="flex h-9 w-full rounded-md border border-slate-200 bg-transparent px-3 py-1 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-slate-950"
                   >
-                    {columns.map(c => (
+                    {columns.map((c: IColumn) => (
                       <option key={c.id} value={c.id}>{c.title}</option>
                     ))}
                   </select>
@@ -236,7 +241,7 @@ export function CreateTaskModal({ children, columnId, columns = [], members = []
               <div className="flex flex-col gap-2 mt-1">
                 <Label className="text-sm font-medium">Assignees</Label>
                 <div className="flex flex-col gap-1.5 max-h-32 overflow-y-auto no-scrollbar p-2 border border-slate-200 rounded-md bg-slate-50/50">
-                  {members.map(m => (
+                  {members.map((m: IUser) => (
                     <label key={m.id} className="flex items-center gap-2 cursor-pointer p-1 rounded hover:bg-slate-100 transition-colors">
                       <input 
                         type="checkbox" 

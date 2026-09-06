@@ -80,7 +80,7 @@ async function bootstrap() {
 
   if (nodeEnv !== 'production') {
     console.log(
-      `📚 Swagger documentation: ${domainWithPort}/${apiPrefix}/docs`,
+      `📚 Swagger documentation: ${domainWithPort}/${apiPrefix}/v1/docs`,
     );
     console.log(`🌍 Environment: ${nodeEnv}`);
   }

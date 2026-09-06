@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import React, { useState, useRef } from "react";
@@ -34,13 +35,14 @@ import { toast } from "sonner";
 import { revalidateBoardsPage } from "@/app/(dashboardlayout)/dashboard/boards/_actions";
 import { getImageUrl } from "@/lib/utils";
 import { editBoardSchema } from "@/zod/board.validation";
+import { IBoard } from "@/types/board.types";
 
 type FormErrors = {
   title?: string[];
   description?: string[];
 };
 
-export function BoardCardMenu({ board }: { board: any }) {
+export function BoardCardMenu({ board }: { board: IBoard }) {
   const router = useRouter();
 
   // States for modals

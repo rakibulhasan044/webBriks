@@ -44,7 +44,7 @@ export default function TasksLoading() {
             </div>
           </div>
 
-          {/* Task List Content Skeleton */}
+          {/* ITask List Content Skeleton */}
           <div className="flex-1 overflow-auto p-6 md:p-8 bg-slate-50/50">
             <div className="max-w-5xl mx-auto space-y-3">
               {[1, 2, 3, 4, 5].map((i) => (

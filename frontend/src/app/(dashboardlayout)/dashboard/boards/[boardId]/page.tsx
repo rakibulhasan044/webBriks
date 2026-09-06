@@ -7,6 +7,14 @@ import { CreateColumnModal } from "@/components/modules/Board/CreateColumnModal"
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { getImageUrl } from "@/lib/utils";
+import { Column } from "@/types/column.types";
+import { Task } from "@/types/task.types";
+import { User } from "@/types/user.type";
+
+import { IColumn } from "@/types/column.types";
+import { ITask } from "@/types/task.types";
+import { IUser } from "@/types/user.type";
+
 
 // Make it a dynamic route
 export const dynamic = "force-dynamic";
@@ -44,7 +52,7 @@ export default async function BoardsPage({
 
   // Map Backend Columns to BoardCanvas Format
   const mappedColumns =
-    board.columns?.map((col: any) => {
+    board.columns?.map((col: IColumn) => {
       // Add default colors based on column name like the mock data did
       let color = "border-slate-300";
       if (col.title === "TO_DO") color = "border-pink-500";
@@ -66,7 +74,7 @@ export default async function BoardsPage({
         title: displayTitle,
         color,
         tasks:
-          col.tasks?.map((task: any) => ({
+          col.tasks?.map((task: ITask) => ({
             id: task.id,
             title: task.title,
             description: task.description,
@@ -210,7 +218,7 @@ export default async function BoardsPage({
               </button>
             </CreateColumnModal>
             <CreateTaskModal
-              columns={board.columns.map((c: any) => ({
+              columns={board.columns.map((c: IColumn) => ({
                 id: c.id,
                 title: c.title,
               }))}

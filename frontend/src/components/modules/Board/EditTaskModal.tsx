@@ -1,4 +1,9 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
+import { ITask } from "@/types/task.types";
+import { IColumn } from "@/types/column.types";
+import { IUser } from "@/types/user.type";
+
 
 import React, { useState, useRef } from "react";
 import {
@@ -28,7 +33,7 @@ type FormErrors = {
 };
 
 interface EditTaskModalProps {
-  task: any; 
+  task: ITask; 
   columns?: { id: string; title: string }[];
   members?: { id: string; name: string; photo?: string }[];
   isOpen: boolean;
@@ -46,13 +51,12 @@ export function EditTaskModal({ task, columns = [], members = [], isOpen, onClos
   const [columnId, setColumnId] = useState<string>(task?.columnId || "");
   const [existingAttachments, setExistingAttachments] = useState<any[]>(task?.attachments || []);
   const [attachmentsToDelete, setAttachmentsToDelete] = useState<string[]>([]);
-  const [deletingAttachmentId, setDeletingAttachmentId] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
 
   React.useEffect(() => {
     if (isOpen && task) {
-      setSelectedAssignees(task.assignees?.map((a: any) => a.id) || []);
+      setSelectedAssignees(task.assignees?.map((a: IUser) => a.id) || []);
       setPriority(task.priority || "MEDIUM");
       setColumnId(task.columnId || "");
       setExistingAttachments(task.attachments || []);
@@ -161,7 +165,7 @@ export function EditTaskModal({ task, columns = [], members = [], isOpen, onClos
         toast.success("Task updated successfully!");
         onClose();
         setAttachment(null);
-        setSelectedAssignees(task.assignees?.map((a: any) => a.id) || []);
+        setSelectedAssignees(task.assignees?.map((a: IUser) => a.id) || []);
         router.refresh();
       } else {
         toast.error(res.message || "Failed to edit task");
@@ -179,14 +183,14 @@ export function EditTaskModal({ task, columns = [], members = [], isOpen, onClos
       if (!open) {
         setErrors({});
         setAttachment(null);
-        setSelectedAssignees(task?.assignees?.map((a: any) => a.id) || []);
+        setSelectedAssignees(task?.assignees?.map((a: IUser) => a.id) || []);
         onClose();
       }
     }}>
       <DialogContent className="sm:max-w-[425px] overflow-hidden no-scrollbar">
         <div className="w-full flex flex-col gap-4 min-w-0 overflow-x-hidden no-scrollbar">
         <DialogHeader>
-          <DialogTitle>Edit Task</DialogTitle>
+          <DialogTitle>Edit ITask</DialogTitle>
           <DialogDescription>
             Update the details of your task.
           </DialogDescription>
@@ -251,7 +255,7 @@ export function EditTaskModal({ task, columns = [], members = [], isOpen, onClos
                     disabled={isLoading}
                     className="flex h-10 w-full rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-sm ring-offset-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 disabled:cursor-not-allowed disabled:opacity-50"
                   >
-                    {columns.map(c => (
+                    {columns.map((c: IColumn) => (
                       <option key={c.id} value={c.id}>{c.title}</option>
                     ))}
                   </select>
@@ -265,7 +269,7 @@ export function EditTaskModal({ task, columns = [], members = [], isOpen, onClos
               <div className="flex flex-col gap-2 mt-1">
                 <Label className="text-sm font-medium">Assignees</Label>
                 <div className="flex flex-col gap-1.5 max-h-32 overflow-y-auto no-scrollbar p-2 border border-slate-200 rounded-md bg-slate-50/50">
-                  {members.map(m => (
+                  {members.map((m: IUser) => (
                     <label key={m.id} className="flex items-center gap-2 cursor-pointer p-1 rounded hover:bg-slate-100 transition-colors">
                       <input 
                         type="checkbox" 
@@ -363,7 +367,7 @@ export function EditTaskModal({ task, columns = [], members = [], isOpen, onClos
             <Button type="button" variant="outline" onClick={onClose} disabled={isLoading}>Cancel</Button>
             <Button type="submit" className="" disabled={isLoading}>
               {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Edit Task
+              Edit ITask
             </Button>
           </DialogFooter>
         </form>

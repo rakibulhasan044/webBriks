@@ -82,7 +82,7 @@ export function setupSwagger(app: INestApplication) {
       customfavIcon: '/favicon.ico',
     };
 
-    const swaggerPath = `${apiPrefix}/docs`.replace(/^\/+/, '');
+    const swaggerPath = `${apiPrefix}/v1/docs`.replace(/^\/+/, '');
 
     SwaggerModule.setup(swaggerPath, app, document, swaggerOptions);
 

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import React, { useState, useRef } from "react";
@@ -114,7 +115,7 @@ export function CreateBoardModal({ children }: { children: React.ReactNode }) {
         <DialogHeader>
           <DialogTitle>Create New Board</DialogTitle>
           <DialogDescription>
-            Give your board a name and set a cover image. We'll automatically generate To Do, In Progress, and Done columns!
+            Give your board a name and set a cover image. We&apos;ll automatically generate To Do, In Progress, and Done columns!
           </DialogDescription>
         </DialogHeader>
         

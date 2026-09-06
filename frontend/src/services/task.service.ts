@@ -1,7 +1,9 @@
+import { ITask } from "@/types/task.types";
+import { ApiResponse } from "@/types/api.types";
 import { httpClient } from "@/lib/axios/httpClient";
 
 export const taskService = {
-  createTask: async (columnId: string, data: any) => {
+  createTask: async (columnId: string, data: any): Promise<ApiResponse<ITask>> => {
     return httpClient.post(`/columns/${columnId}/tasks`, data);
   },
   
