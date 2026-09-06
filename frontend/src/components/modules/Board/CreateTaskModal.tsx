@@ -225,7 +225,7 @@ export function CreateTaskModal({ children, columnId, columns = [], members = []
             {members.length > 0 && (
               <div className="flex flex-col gap-2 mt-1">
                 <Label className="text-sm font-medium">Assignees</Label>
-                <div className="flex flex-col gap-1.5 max-h-32 overflow-y-auto no-scrollbar p-2 border border-slate-200 rounded-md bg-white/50">
+                <div className="flex flex-col gap-1.5 max-h-32 overflow-y-auto no-scrollbar p-2 border border-slate-200 rounded-md bg-slate-50/50">
                   {members.map(m => (
                     <label key={m.id} className="flex items-center gap-2 cursor-pointer p-1 rounded hover:bg-slate-100 transition-colors">
                       <input 
@@ -266,7 +266,7 @@ export function CreateTaskModal({ children, columnId, columns = [], members = []
                   Attach a file
                 </button>
               ) : (
-                <div className="flex items-center justify-between p-2 border border-slate-200 rounded-md bg-white shadow-sm min-w-0">
+                <div className="flex items-center justify-between p-2 border border-slate-200 rounded-md bg-slate-50 shadow-sm min-w-0">
                   <div className="flex items-center gap-2 overflow-hidden min-w-0 flex-1">
                     <Paperclip className="w-4 h-4 text-indigo-500 flex-shrink-0" />
                     <span className="text-xs font-medium text-slate-700 truncate min-w-0">{attachment.name}</span>

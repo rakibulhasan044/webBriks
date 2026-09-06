@@ -12,6 +12,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { getImageUrl } from "@/lib/utils";
 
 export function UserNavAction({ user }: { user: any | null }) {
   const handleLogout = () => {
@@ -34,10 +35,10 @@ export function UserNavAction({ user }: { user: any | null }) {
 
 return (
     <DropdownMenu>
-      <DropdownMenuTrigger className="flex items-center gap-3 focus:outline-none rounded-xl p-1.5 pr-3 hover:bg-white hover:shadow-sm transition-all duration-200 border border-transparent hover:border-slate-200/80 group">
+      <DropdownMenuTrigger className="flex items-center gap-3 focus:outline-none rounded-xl p-1.5 pr-3 hover:bg-slate-50 hover:shadow-sm transition-all duration-200 border border-transparent hover:border-slate-200/80 group">
         <Avatar className="h-9 w-9 border-2 border-white shadow-sm ring-1 ring-slate-100 transition-transform group-hover:scale-105">
           {user.photo && typeof user.photo === "string" && user.photo !== "null" && (
-            <AvatarImage src={user.photo} alt="User Avatar" className="object-cover" />
+            <AvatarImage src={getImageUrl(user.photo) as string} alt="User Avatar" className="object-cover" />
           )}
           <AvatarFallback className="bg-indigo-50 text-indigo-600">
             <User className="h-4 w-4" />
@@ -54,14 +55,14 @@ return (
         <ChevronDown className="w-3.5 h-3.5 text-slate-400 hidden sm:block transition-transform group-data-[state=open]:rotate-180" />
       </DropdownMenuTrigger>
       
-      <DropdownMenuContent align="end" className="w-60 mt-2 bg-white/85 backdrop-blur-2xl border border-slate-200/50 shadow-xl shadow-slate-200/20 rounded-2xl p-1.5">
+      <DropdownMenuContent align="end" className="w-60 mt-2 bg-slate-50/85 backdrop-blur-2xl border border-slate-200/50 shadow-xl shadow-slate-200/20 rounded-2xl p-1.5">
         {/* Mobile user info */}
         <DropdownMenuGroup className="sm:hidden">
           <DropdownMenuLabel className="font-normal p-3">
             <div className="flex items-center gap-3">
               <Avatar className="h-10 w-10 border-2 border-white shadow-sm ring-1 ring-slate-100">
                 {user.photo && typeof user.photo === "string" && user.photo !== "null" && (
-                  <AvatarImage src={user.photo} alt="User Avatar" className="object-cover" />
+                  <AvatarImage src={getImageUrl(user.photo) as string} alt="User Avatar" className="object-cover" />
                 )}
                 <AvatarFallback className="bg-indigo-50 text-indigo-600">
                   <User className="h-4 w-4" />
@@ -81,6 +82,15 @@ return (
         <DropdownMenuSeparator className="sm:hidden bg-slate-100" />
         
         {/* Menu Items */}
+        <DropdownMenuItem
+          render={<Link href="/dashboard/profile" />}
+          className="rounded-xl cursor-pointer text-slate-600 hover:text-slate-900 focus:bg-indigo-50 focus:text-indigo-700 p-2.5"
+        >
+          <div className="w-8 h-8 rounded-lg bg-indigo-100 flex items-center justify-center mr-3 shadow-sm">
+            <User className="w-4 h-4 text-indigo-600" />
+          </div>
+          <span className="text-sm font-semibold">My Profile</span>
+        </DropdownMenuItem>
         <DropdownMenuItem
           render={<Link href="/dashboard" />}
           className="rounded-xl cursor-pointer text-slate-600 hover:text-slate-900 focus:bg-sky-50 focus:text-sky-700 p-2.5"

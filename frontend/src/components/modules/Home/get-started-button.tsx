@@ -11,7 +11,7 @@ export function GetStartedButton() {
     <Button
       size="lg"
       onClick={() => router.push("/login")}
-      className="group rounded-full px-8 py-6 text-lg font-medium transition-all hover:scale-105 hover:shadow-lg"
+      className="group rounded-full px-8 py-6 text-lg font-medium transition-all hover:scale-105 hover:shadow-lg cursor-pointer"
     >
       Start Organizing Now
       <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />

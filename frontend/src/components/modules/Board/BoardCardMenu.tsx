@@ -138,7 +138,7 @@ export function BoardCardMenu({ board }: { board: any }) {
         <DropdownMenuTrigger
           render={
             <button
-              className="p-2 rounded-xl bg-white/70 backdrop-blur-xl hover:bg-white text-slate-600 shadow-sm hover:shadow-md transition-all duration-200 border border-slate-200/50 hover:border-slate-300/80 hover:-translate-y-0.5"
+              className="p-2 rounded-xl bg-slate-50/70 backdrop-blur-xl hover:bg-slate-50 text-slate-600 shadow-sm hover:shadow-md transition-all duration-200 border border-slate-200/50 hover:border-slate-300/80 hover:-translate-y-0.5"
               aria-label="Board Options"
             >
               <MoreVertical className="w-4 h-4" />
@@ -147,7 +147,7 @@ export function BoardCardMenu({ board }: { board: any }) {
         />
         <DropdownMenuContent
           align="end"
-          className="w-52 bg-white/80 backdrop-blur-2xl border border-slate-200/40 shadow-xl shadow-slate-200/20 rounded-xl p-1.5"
+          className="w-52 bg-slate-50/80 backdrop-blur-2xl border border-slate-200/40 shadow-xl shadow-slate-200/20 rounded-xl p-1.5"
         >
           <DropdownMenuItem
             onClick={() => router.push(`/dashboard/boards/${board.id}`)}
@@ -195,7 +195,7 @@ export function BoardCardMenu({ board }: { board: any }) {
           }
         }}
       >
-        <DialogContent className="sm:max-w-[480px] bg-white/95 backdrop-blur-2xl border border-slate-200/60 shadow-2xl shadow-slate-200/30 rounded-2xl p-0 overflow-hidden">
+        <DialogContent className="sm:max-w-[480px] bg-slate-50/95 backdrop-blur-2xl border border-slate-200/60 shadow-2xl shadow-slate-200/30 rounded-2xl p-0 overflow-hidden">
           {/* Header with subtle gradient accent */}
           <div className="bg-gradient-to-r from-indigo-50/80 via-violet-50/60 to-fuchsia-50/40 px-6 pt-6 pb-4 border-b border-slate-100">
             <DialogHeader className="space-y-1">
@@ -226,7 +226,7 @@ export function BoardCardMenu({ board }: { board: any }) {
                     name="title"
                     defaultValue={board.title}
                     placeholder="e.g. Marketing Campaign"
-                    className={`rounded-xl border-slate-200 bg-slate-50/50 focus:bg-white focus:border-indigo-300 focus:ring-2 focus:ring-indigo-100 transition-all ${
+                    className={`rounded-xl border-slate-200 bg-slate-50/50 focus:bg-slate-50 focus:border-indigo-300 focus:ring-2 focus:ring-indigo-100 transition-all ${
                       errors.title
                         ? "border-rose-400 focus:border-rose-400 focus:ring-rose-100"
                         : ""
@@ -254,7 +254,7 @@ export function BoardCardMenu({ board }: { board: any }) {
                     name="description"
                     defaultValue={board.description || ""}
                     placeholder="Add some details about this board..."
-                    className={`flex min-h-[90px] w-full rounded-xl border bg-slate-50/50 px-3.5 py-2.5 text-sm shadow-sm placeholder:text-slate-400 focus:bg-white focus:border-indigo-300 focus:ring-2 focus:ring-indigo-100 focus-visible:outline-none transition-all resize-none ${
+                    className={`flex min-h-[90px] w-full rounded-xl border bg-slate-50/50 px-3.5 py-2.5 text-sm shadow-sm placeholder:text-slate-400 focus:bg-slate-50 focus:border-indigo-300 focus:ring-2 focus:ring-indigo-100 focus-visible:outline-none transition-all resize-none ${
                       errors.description
                         ? "border-rose-400 focus:border-rose-400 focus:ring-rose-100"
                         : "border-slate-200"
@@ -353,7 +353,7 @@ export function BoardCardMenu({ board }: { board: any }) {
 
       {/* DELETE MODAL */}
       <Dialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen}>
-        <DialogContent className="sm:max-w-[420px] bg-white/95 backdrop-blur-2xl border border-rose-200/40 shadow-2xl shadow-rose-100/30 rounded-2xl p-0 overflow-hidden">
+        <DialogContent className="sm:max-w-[420px] bg-slate-50/95 backdrop-blur-2xl border border-rose-200/40 shadow-2xl shadow-rose-100/30 rounded-2xl p-0 overflow-hidden">
           <div className="bg-gradient-to-br from-rose-50 to-orange-50/30 px-6 pt-6 pb-4 border-b border-rose-100/50">
             <DialogHeader className="space-y-1">
               <DialogTitle className="text-lg font-bold text-rose-700 flex items-center gap-2.5">

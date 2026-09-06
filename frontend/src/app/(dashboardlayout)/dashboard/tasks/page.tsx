@@ -4,7 +4,6 @@ import { ListTodo, Flag, LayoutDashboard, ArrowUpRight } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import Link from "next/link";
 import { getImageUrl } from "@/lib/utils";
-import { Badge } from "@/components/ui/badge";
 
 export const dynamic = "force-dynamic";
 
@@ -45,7 +44,7 @@ export default async function MyTasksPage() {
 return (
     <div className="flex flex-col h-full bg-slate-50/50">
       {/* Page Header */}
-      <div className="flex-none px-6 py-5 md:px-8 md:py-6 bg-white/80 backdrop-blur-xl border-b border-slate-200/60 shadow-[0_1px_3px_rgba(0,0,0,0.04)]">
+      <div className="flex-none px-6 py-5 md:px-8 md:py-6 bg-slate-50/80 backdrop-blur-xl border-b border-slate-200/60 shadow-[0_1px_3px_rgba(0,0,0,0.04)]">
         <div className="flex items-center gap-3.5 mb-2">
           <div className="p-2.5 bg-gradient-to-br from-indigo-100 to-violet-100 rounded-xl shadow-sm">
             <ListTodo className="w-6 h-6 text-indigo-600" />
@@ -61,7 +60,7 @@ return (
       <div className="flex-1 overflow-auto p-6 md:p-8">
         <div className="max-w-5xl mx-auto space-y-3">
           {tasks.length === 0 ? (
-            <div className="flex flex-col items-center justify-center p-16 text-center bg-white/70 backdrop-blur-sm rounded-3xl border-2 border-dashed border-slate-200">
+            <div className="flex flex-col items-center justify-center p-16 text-center bg-slate-50/70 backdrop-blur-sm rounded-3xl border-2 border-dashed border-slate-200">
               <div className="w-20 h-20 bg-gradient-to-br from-indigo-50 to-violet-50 rounded-2xl flex items-center justify-center mb-5 shadow-sm">
                 <ListTodo className="w-9 h-9 text-indigo-300" />
               </div>
@@ -72,21 +71,21 @@ return (
             tasks.map((task: any, index: number) => {
               // Cycle through pastel accent themes per task card
               const themes = [
-                { border: "hover:border-amber-300", shadow: "hover:shadow-amber-100/50", badgeBg: "bg-amber-50", badgeText: "text-amber-700", badgeBorder: "border-amber-200", colBg: "bg-amber-100", colText: "text-amber-800" },
-                { border: "hover:border-emerald-300", shadow: "hover:shadow-emerald-100/50", badgeBg: "bg-emerald-50", badgeText: "text-emerald-700", badgeBorder: "border-emerald-200", colBg: "bg-emerald-100", colText: "text-emerald-800" },
-                { border: "hover:border-sky-300", shadow: "hover:shadow-sky-100/50", badgeBg: "bg-sky-50", badgeText: "text-sky-700", badgeBorder: "border-sky-200", colBg: "bg-sky-100", colText: "text-sky-800" },
-                { border: "hover:border-violet-300", shadow: "hover:shadow-violet-100/50", badgeBg: "bg-violet-50", badgeText: "text-violet-700", badgeBorder: "border-violet-200", colBg: "bg-violet-100", colText: "text-violet-800" },
-                { border: "hover:border-rose-300", shadow: "hover:shadow-rose-100/50", badgeBg: "bg-rose-50", badgeText: "text-rose-700", badgeBorder: "border-rose-200", colBg: "bg-rose-100", colText: "text-rose-800" },
+                { border: "hover:border-amber-300", shadow: "hover:shadow-amber-100/50", badgeBg: "bg-amber-50", badgeText: "text-amber-700", badgeBorder: "border-amber-200", colBg: "bg-amber-100", colText: "text-amber-800", lineBg: "bg-amber-400" },
+                { border: "hover:border-emerald-300", shadow: "hover:shadow-emerald-100/50", badgeBg: "bg-emerald-50", badgeText: "text-emerald-700", badgeBorder: "border-emerald-200", colBg: "bg-emerald-100", colText: "text-emerald-800", lineBg: "bg-emerald-400" },
+                { border: "hover:border-sky-300", shadow: "hover:shadow-sky-100/50", badgeBg: "bg-sky-50", badgeText: "text-sky-700", badgeBorder: "border-sky-200", colBg: "bg-sky-100", colText: "text-sky-800", lineBg: "bg-sky-400" },
+                { border: "hover:border-violet-300", shadow: "hover:shadow-violet-100/50", badgeBg: "bg-violet-50", badgeText: "text-violet-700", badgeBorder: "border-violet-200", colBg: "bg-violet-100", colText: "text-violet-800", lineBg: "bg-violet-400" },
+                { border: "hover:border-rose-300", shadow: "hover:shadow-rose-100/50", badgeBg: "bg-rose-50", badgeText: "text-rose-700", badgeBorder: "border-rose-200", colBg: "bg-rose-100", colText: "text-rose-800", lineBg: "bg-rose-400" },
               ];
               const theme = themes[index % themes.length];
               
               return (
                 <div 
                   key={task.id} 
-                  className={`group relative flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 bg-white rounded-2xl border border-slate-100 shadow-[0_2px_12px_-4px_rgba(0,0,0,0.05)] hover:shadow-lg ${theme.shadow} ${theme.border} hover:-translate-y-0.5 transition-all duration-300 overflow-hidden`}
+                  className={`group relative flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 bg-slate-50 rounded-2xl border border-slate-100 shadow-[0_2px_12px_-4px_rgba(0,0,0,0.05)] hover:shadow-lg ${theme.shadow} ${theme.border} hover:-translate-y-0.5 transition-all duration-300 overflow-hidden`}
                 >
                   {/* Subtle left accent line */}
-                  <div className={`absolute left-0 top-4 bottom-4 w-[3px] rounded-r-full ${theme.colBg.replace('bg-', 'bg-').replace('100', '400')} opacity-60`} />
+                  <div className={`absolute left-0 top-4 bottom-4 w-[3px] rounded-r-full ${theme.lineBg} opacity-60`} />
                   
                   {/* Left side: Info */}
                   <div className="flex-1 min-w-0 pl-3">

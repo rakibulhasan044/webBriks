@@ -91,7 +91,7 @@ export default async function BoardsPage({ params }: { params: Promise<{ boardId
 return (
     <div className="flex flex-col h-[calc(100vh-4rem)] bg-slate-50/50 -m-6 md:-m-8">
       {/* Board Header */}
-      <div className="flex-none px-6 py-5 md:px-8 md:py-6 bg-white/80 backdrop-blur-xl border-b border-slate-200/60 shadow-[0_1px_3px_rgba(0,0,0,0.04)] z-10 relative">
+      <div className="flex-none px-6 py-5 md:px-8 md:py-6 bg-slate-50/80 backdrop-blur-xl border-b border-slate-200/60 shadow-[0_1px_3px_rgba(0,0,0,0.04)] z-10 relative">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 relative z-10">
           <div className="flex flex-col gap-2">
             <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight">{board.title}</h1>
@@ -147,12 +147,12 @@ return (
           </div>
           
           <div className="flex items-center gap-2.5">
-            <button className="flex items-center gap-2 px-3.5 py-2 text-[13px] font-semibold text-slate-600 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 hover:border-slate-300 hover:shadow-sm transition-all">
+            <button className="flex items-center gap-2 px-3.5 py-2 text-[13px] font-semibold text-slate-600 bg-slate-50 border border-slate-200 rounded-xl hover:bg-slate-50 hover:border-slate-300 hover:shadow-sm transition-all">
               <Filter className="w-3.5 h-3.5" />
               Filter
             </button>
             <CreateColumnModal boardId={board.id}>
-              <button className="flex items-center gap-2 px-3.5 py-2 text-[13px] font-semibold text-slate-600 bg-white border border-slate-200 rounded-xl shadow-sm hover:bg-slate-50 hover:border-slate-300 hover:shadow-md transition-all">
+              <button className="flex items-center gap-2 px-3.5 py-2 text-[13px] font-semibold text-slate-600 bg-slate-50 border border-slate-200 rounded-xl shadow-sm hover:bg-slate-50 hover:border-slate-300 hover:shadow-md transition-all">
                 <Layout className="w-3.5 h-3.5" />
                 Add Column
               </button>

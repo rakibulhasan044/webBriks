@@ -259,10 +259,10 @@ return (
                               ref={provided.innerRef}
                               {...provided.draggableProps}
                               {...provided.dragHandleProps}
-                              className={`group p-4 rounded-xl border transition-all duration-200 relative mb-3 bg-white/80 backdrop-blur-sm ${
+                              className={`group p-4 rounded-xl border transition-all duration-200 relative mb-3 bg-slate-50/80 backdrop-blur-sm ${
                                 snapshot.isDragging 
                                   ? "shadow-xl scale-[1.02] ring-2 ring-indigo-400/30 z-50 rotate-1" 
-                                  : "shadow-sm hover:shadow-md hover:bg-white"
+                                  : "shadow-sm hover:shadow-md hover:bg-slate-50"
                               }`}
                             >
                               {/* Priority & Options */}
@@ -303,13 +303,22 @@ return (
                                         <MoreHorizontal className="w-4 h-4" />
                                       </button>
                                     } />
-                                    <DropdownMenuContent align="end" className="w-40 bg-white/95 backdrop-blur-md border border-slate-200/50 shadow-lg">
-                                      <DropdownMenuItem onClick={() => setTaskToEdit(task)} className="cursor-pointer">
-                                        <Edit2 className="w-4 h-4 mr-2 text-slate-500" />
+                                    <DropdownMenuContent 
+                                      align="end" 
+                                      className="w-44 bg-slate-50/80 backdrop-blur-2xl border border-slate-200/40 shadow-xl shadow-slate-200/20 rounded-xl p-1.5"
+                                    >
+                                      <DropdownMenuItem 
+                                        onClick={() => setTaskToEdit(task)} 
+                                        className="rounded-lg p-2.5 cursor-pointer font-medium text-slate-700 hover:text-slate-900 focus:bg-indigo-50 focus:text-indigo-700 transition-colors group"
+                                      >
+                                        <Edit2 className="w-4 h-4 mr-2 text-slate-400 group-focus:text-indigo-600" />
                                         Edit Task
                                       </DropdownMenuItem>
-                                      <DropdownMenuItem onClick={() => setTaskToDelete({ id: task.id, title: task.title })} className="text-red-600 focus:text-red-700 focus:bg-red-50">
-                                        <Trash2 className="w-4 h-4 mr-2" />
+                                      <DropdownMenuItem 
+                                        onClick={() => setTaskToDelete({ id: task.id, title: task.title })} 
+                                        className="rounded-lg p-2.5 cursor-pointer font-medium text-rose-600 focus:text-rose-700 focus:bg-rose-50 transition-colors group"
+                                      >
+                                        <Trash2 className="w-4 h-4 mr-2 text-rose-500 group-focus:text-rose-600" />
                                         Delete Task
                                       </DropdownMenuItem>
                                     </DropdownMenuContent>
@@ -361,7 +370,7 @@ return (
                                 <div className="flex items-center -space-x-1.5">
                                   {task.assignees && task.assignees.length > 0 ? (
                                     task.assignees.map((assignee: any) => (
-                                      <Avatar key={assignee.id} className="h-6 w-6 border-2 border-white shadow-sm bg-white" title={assignee.name}>
+                                      <Avatar key={assignee.id} className="h-6 w-6 border-2 border-white shadow-sm bg-slate-50" title={assignee.name}>
                                         {assignee.photo && <AvatarImage src={getImageUrl(assignee.photo) as string} />}
                                         <AvatarFallback className="bg-indigo-100 text-indigo-700 text-[10px] font-bold">
                                           {assignee.name?.charAt(0) || "U"}
@@ -398,7 +407,7 @@ return (
       </div>
 
       <Dialog open={!!taskToDelete} onOpenChange={(open) => !open && setTaskToDelete(null)}>
-        <DialogContent className="sm:max-w-md bg-white/95 backdrop-blur-xl border border-slate-200/60 shadow-2xl">
+        <DialogContent className="sm:max-w-md bg-slate-50/95 backdrop-blur-xl border border-slate-200/60 shadow-2xl">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2 text-red-600">
               <AlertTriangle className="w-5 h-5" />
@@ -411,7 +420,7 @@ return (
           <div className="flex justify-end gap-3 mt-4">
             <button 
               onClick={() => setTaskToDelete(null)} 
-              className="px-4 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors shadow-sm"
+              className="px-4 py-2 text-sm font-medium text-slate-700 bg-slate-50 border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors shadow-sm"
             >
               Cancel
             </button>

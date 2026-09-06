@@ -214,7 +214,7 @@ export function EditTaskModal({ task, columns = [], members = [], isOpen, onClos
                 defaultValue={task?.description}
                 placeholder="Add more details about this task..." 
                 disabled={isLoading}
-                className="flex min-h-[80px] w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm ring-offset-white placeholder:text-slate-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 disabled:cursor-not-allowed disabled:opacity-50"
+                className="flex min-h-[80px] w-full rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-sm ring-offset-white placeholder:text-slate-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 disabled:cursor-not-allowed disabled:opacity-50"
               />
               {errors.description && <p className="text-xs text-red-500">{errors.description[0]}</p>}
             </div>
@@ -229,7 +229,7 @@ export function EditTaskModal({ task, columns = [], members = [], isOpen, onClos
                   value={priority}
                   onChange={(e) => setPriority(e.target.value)}
                   disabled={isLoading}
-                  className="flex h-10 w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm ring-offset-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 disabled:cursor-not-allowed disabled:opacity-50"
+                  className="flex h-10 w-full rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-sm ring-offset-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   <option value="LOW">Low</option>
                   <option value="MEDIUM">Medium</option>
@@ -248,7 +248,7 @@ export function EditTaskModal({ task, columns = [], members = [], isOpen, onClos
                     value={columnId}
                     onChange={(e) => setColumnId(e.target.value)}
                     disabled={isLoading}
-                    className="flex h-10 w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm ring-offset-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 disabled:cursor-not-allowed disabled:opacity-50"
+                    className="flex h-10 w-full rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-sm ring-offset-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 disabled:cursor-not-allowed disabled:opacity-50"
                   >
                     {columns.map(c => (
                       <option key={c.id} value={c.id}>{c.title}</option>
@@ -263,7 +263,7 @@ export function EditTaskModal({ task, columns = [], members = [], isOpen, onClos
             {members.length > 0 && (
               <div className="flex flex-col gap-2 mt-1">
                 <Label className="text-sm font-medium">Assignees</Label>
-                <div className="flex flex-col gap-1.5 max-h-32 overflow-y-auto no-scrollbar p-2 border border-slate-200 rounded-md bg-white/50">
+                <div className="flex flex-col gap-1.5 max-h-32 overflow-y-auto no-scrollbar p-2 border border-slate-200 rounded-md bg-slate-50/50">
                   {members.map(m => (
                     <label key={m.id} className="flex items-center gap-2 cursor-pointer p-1 rounded hover:bg-slate-100 transition-colors">
                       <input 
@@ -332,7 +332,7 @@ export function EditTaskModal({ task, columns = [], members = [], isOpen, onClos
                       Attach a new file
                     </button>
                   ) : (
-                    <div className="flex items-center justify-between p-2 border border-slate-200 rounded-md bg-white shadow-sm border-indigo-100 min-w-0">
+                    <div className="flex items-center justify-between p-2 border border-slate-200 rounded-md bg-slate-50 shadow-sm border-indigo-100 min-w-0">
                       <div className="flex items-center gap-2 overflow-hidden min-w-0 flex-1">
                         <Paperclip className="w-4 h-4 text-indigo-500 flex-shrink-0" />
                         <span className="text-xs font-medium text-slate-700 truncate min-w-0">{attachment.name}</span>

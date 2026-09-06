@@ -7,14 +7,14 @@ export function KanbanArt() {
       {/* The Kanban Board inside the "cutout" */}
       <div className="absolute top-[20%] left-[30%] w-[300px] transform rotate-3 flex gap-4">
         {/* Column 1 */}
-        <div className="flex-1 bg-white/60 backdrop-blur-md rounded-2xl p-4 shadow-sm border border-white/50">
+        <div className="flex-1 bg-slate-50/60 backdrop-blur-md rounded-2xl p-4 shadow-sm border border-white/50">
           <div className="w-16 h-2 bg-indigo-200 rounded-full mb-4"></div>
           <div className="space-y-3">
-            <div className="bg-white p-3 rounded-xl shadow-[0_4px_12px_rgba(0,0,0,0.05)] border border-slate-100">
+            <div className="bg-slate-50 p-3 rounded-xl shadow-[0_4px_12px_rgba(0,0,0,0.05)] border border-slate-100">
               <div className="w-8 h-1.5 bg-orange-300 rounded-full mb-2"></div>
               <div className="w-full h-2 bg-slate-100 rounded-full"></div>
             </div>
-            <div className="bg-white p-3 rounded-xl shadow-[0_4px_12px_rgba(0,0,0,0.05)] border border-slate-100">
+            <div className="bg-slate-50 p-3 rounded-xl shadow-[0_4px_12px_rgba(0,0,0,0.05)] border border-slate-100">
               <div className="w-10 h-1.5 bg-emerald-300 rounded-full mb-2"></div>
               <div className="w-full h-2 bg-slate-100 rounded-full"></div>
             </div>
@@ -22,10 +22,10 @@ export function KanbanArt() {
         </div>
 
         {/* Column 2 */}
-        <div className="flex-1 bg-white/60 backdrop-blur-md rounded-2xl p-4 shadow-sm border border-white/50 mt-8">
+        <div className="flex-1 bg-slate-50/60 backdrop-blur-md rounded-2xl p-4 shadow-sm border border-white/50 mt-8">
           <div className="w-12 h-2 bg-pink-200 rounded-full mb-4"></div>
           <div className="space-y-3">
-            <div className="bg-white p-3 rounded-xl shadow-[0_4px_12px_rgba(0,0,0,0.05)] border border-slate-100 transform -rotate-2 scale-105">
+            <div className="bg-slate-50 p-3 rounded-xl shadow-[0_4px_12px_rgba(0,0,0,0.05)] border border-slate-100 transform -rotate-2 scale-105">
               <div className="w-8 h-1.5 bg-purple-300 rounded-full mb-2"></div>
               <div className="w-[80%] h-2 bg-slate-100 rounded-full"></div>
             </div>

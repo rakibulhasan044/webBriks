@@ -50,7 +50,7 @@ export function FeaturesSection() {
   ];
 
   return (
-    <section className="py-24 bg-white relative overflow-hidden">
+    <section className="py-24 bg-slate-50 relative overflow-hidden">
       {/* Decorative Blur */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-indigo-50/50 rounded-full blur-3xl -z-10"></div>
 
@@ -80,7 +80,7 @@ export function FeaturesSection() {
               viewport={{ once: true, amount: 0.1 }}
               transition={{ duration: 0.5, delay: i * 0.1 }}
               whileHover={{ y: -5, transition: { duration: 0.2 } }}
-              className="p-8 rounded-[2rem] border border-slate-100 bg-white shadow-xl shadow-slate-200/40 relative overflow-hidden group"
+              className="p-8 rounded-[2rem] border border-slate-100 bg-slate-50 shadow-xl shadow-slate-200/40 relative overflow-hidden group"
             >
               <div className={`w-14 h-14 rounded-2xl ${feature.bg} ${feature.border} border flex items-center justify-center mb-8 shadow-inner group-hover:scale-110 transition-transform duration-500`}>
                 {feature.icon}

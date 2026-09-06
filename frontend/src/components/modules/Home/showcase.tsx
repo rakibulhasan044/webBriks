@@ -55,7 +55,7 @@ export function ShowcaseSection() {
           >
             <div className="absolute inset-0 bg-gradient-to-tr from-purple-400 to-pink-400 rounded-[3rem] transform rotate-3 opacity-20 blur-2xl"></div>
             
-            <div className="relative bg-white border border-slate-100 shadow-2xl shadow-purple-900/10 rounded-[2.5rem] p-6 transform transition-transform hover:-translate-y-2 duration-500">
+            <div className="relative bg-slate-50 border border-slate-100 shadow-2xl shadow-purple-900/10 rounded-[2.5rem] p-6 transform transition-transform hover:-translate-y-2 duration-500">
               <div className="flex gap-4">
                 
                 {/* Column */}
@@ -69,7 +69,7 @@ export function ShowcaseSection() {
                     <motion.div 
                       animate={{ y: [0, -15, 0], rotate: [0, 2, 0], scale: [1, 1.02, 1] }}
                       transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-                      className="bg-white p-5 rounded-xl shadow-lg shadow-orange-900/5 border border-orange-100 z-10 relative cursor-grabbing"
+                      className="bg-slate-50 p-5 rounded-xl shadow-lg shadow-orange-900/5 border border-orange-100 z-10 relative cursor-grabbing"
                     >
                       <div className="w-12 h-1.5 bg-orange-400 rounded-full mb-3"></div>
                       <p className="text-[15px] font-bold text-slate-800">Update landing page copy</p>
@@ -86,7 +86,7 @@ export function ShowcaseSection() {
                     <h4 className="text-sm font-bold text-slate-800">Review</h4>
                   </div>
                   <div className="space-y-4">
-                    <div className="bg-white p-5 rounded-xl shadow-sm border border-slate-100 opacity-70">
+                    <div className="bg-slate-50 p-5 rounded-xl shadow-sm border border-slate-100 opacity-70">
                       <div className="w-12 h-1.5 bg-pink-400 rounded-full mb-3"></div>
                       <p className="text-[15px] font-bold text-slate-800">User testing phase 1</p>
                     </div>

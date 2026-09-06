@@ -31,10 +31,10 @@ export function AuthCard({ title, type, children }: AuthCardProps) {
         initial={{ opacity: 0, scale: 0.95, y: 20 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         transition={{ duration: 0.6, type: "spring", bounce: 0.3 }}
-        className="w-full max-w-[1000px] min-h-[600px] bg-white rounded-[2.5rem] shadow-2xl shadow-indigo-900/5 flex overflow-hidden relative z-10 border border-white"
+        className="w-full max-w-[1000px] min-h-[600px] bg-slate-50 rounded-[2.5rem] shadow-2xl shadow-indigo-900/5 flex overflow-hidden relative z-10 border border-white"
       >
         {/* Left Side: Form (3/5) */}
-        <div className="w-full md:w-3/5 p-10 sm:p-14 lg:p-20 flex flex-col justify-center relative z-20 bg-white/80 backdrop-blur-xl">
+        <div className="w-full md:w-3/5 p-10 sm:p-14 lg:p-20 flex flex-col justify-center relative z-20 bg-slate-50/80 backdrop-blur-xl">
           <div className="w-full max-w-[420px] mx-auto">
             <motion.div
               initial={{ opacity: 0, x: -20 }}
@@ -43,8 +43,8 @@ export function AuthCard({ title, type, children }: AuthCardProps) {
               className="flex items-center gap-2 mb-12"
             >
               <Link href="/" className="flex items-center gap-2 group">
-                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-md group-hover:shadow-indigo-500/25 transition-all">
-                  <div className="w-3.5 h-3.5 rounded-sm bg-white"></div>
+                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-indigo-600 flex items-center justify-center shadow-md group-hover:shadow-indigo-500/25 transition-all">
+                  <div className="w-3.5 h-3.5 rounded-sm bg-slate-50"></div>
                 </div>
                 <span className="font-bold text-xl tracking-tight text-slate-800 group-hover:text-indigo-600 transition-colors">
                   ZenBoard

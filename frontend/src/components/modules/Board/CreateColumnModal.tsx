@@ -84,7 +84,7 @@ export function CreateColumnModal({ children, boardId }: { children: React.React
                 name="title"
                 defaultValue=""
                 disabled={isLoading}
-                className="flex h-10 w-full rounded-md border border-slate-200 bg-white/50 px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-slate-950 disabled:cursor-not-allowed disabled:opacity-50"
+                className="flex h-10 w-full rounded-md border border-slate-200 bg-slate-50/50 px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-slate-950 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 <option value="" disabled>Select a title...</option>
                 <option value="TO_DO">To Do</option>

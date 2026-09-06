@@ -64,7 +64,7 @@ return (
               name="search"
               defaultValue={search}
               placeholder="Search boards..." 
-              className="pl-10 pr-4 py-2.5 text-sm bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-400 transition-all w-full md:w-72 shadow-sm hover:border-slate-300 placeholder:text-slate-400"
+              className="pl-10 pr-4 py-2.5 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-400 transition-all w-full md:w-72 shadow-sm hover:border-slate-300 placeholder:text-slate-400"
             />
             <button type="submit" className="hidden"></button>
           </form>
@@ -79,7 +79,7 @@ return (
 
       {/* Grid section */}
       {boards.length === 0 ? (
-        <div className="flex-1 flex flex-col items-center justify-center border-2 border-dashed border-slate-200 rounded-3xl bg-white/60 backdrop-blur-sm p-12 text-center">
+        <div className="flex-1 flex flex-col items-center justify-center border-2 border-dashed border-slate-200 rounded-3xl bg-slate-50/60 backdrop-blur-sm p-12 text-center">
           <div className="bg-gradient-to-br from-indigo-100 to-violet-100 text-indigo-600 p-4 rounded-2xl mb-5 shadow-sm">
             <LayoutTemplate className="w-8 h-8" />
           </div>
@@ -107,7 +107,7 @@ return (
             const theme = themes[index % themes.length];
             
             return (
-              <div key={board.id} className={`relative group flex flex-col bg-white rounded-3xl border border-slate-100 shadow-[0_2px_16px_-4px_rgba(0,0,0,0.06)] hover:shadow-[0_12px_40px_-8px_rgba(0,0,0,0.15)] hover:-translate-y-1 transition-all duration-300 min-h-[300px] overflow-hidden ${theme.hoverBorder}`}>
+              <div key={board.id} className={`relative group flex flex-col bg-slate-50 rounded-3xl border border-slate-100 shadow-[0_2px_16px_-4px_rgba(0,0,0,0.06)] hover:shadow-[0_12px_40px_-8px_rgba(0,0,0,0.15)] hover:-translate-y-1 transition-all duration-300 min-h-[300px] overflow-hidden ${theme.hoverBorder}`}>
                 {/* Top accent line */}
                 <div className={`h-1 w-full ${theme.accent} opacity-80`} />
                 

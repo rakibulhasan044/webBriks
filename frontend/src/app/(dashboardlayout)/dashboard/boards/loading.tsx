@@ -15,7 +15,7 @@ export default function BoardsLoading() {
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
         {[1, 2, 3, 4, 5, 6].map((i) => (
-          <div key={i} className="flex flex-col bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden h-[300px]">
+          <div key={i} className="flex flex-col bg-slate-50 rounded-xl border border-slate-200 shadow-sm overflow-hidden h-[300px]">
             <div className="h-32 w-full bg-slate-200 flex-shrink-0"></div>
             <div className="p-5 flex-1 flex flex-col">
               <div className="h-5 w-3/4 bg-slate-200 rounded-md mb-3"></div>

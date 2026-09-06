@@ -1,6 +1,6 @@
 "use client";
 
-import { Search, Home, LogOut, User, Menu, ChevronDown } from "lucide-react";
+import { Home, LogOut, User, Menu, ChevronDown } from "lucide-react";
 import Link from "next/link";
 import {
   DropdownMenu,
@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { IUser } from "@/types/user.type";
+import { getImageUrl } from "@/lib/utils";
 
 export function Topbar({ user }: { user?: IUser }) {
   
@@ -24,21 +25,13 @@ export function Topbar({ user }: { user?: IUser }) {
   };
 
   return (
-    <header className="h-16 flex items-center justify-between px-6 bg-white border-b border-slate-200 z-10">
+    <header className="h-16 flex items-center justify-between px-6 bg-slate-50 border-b border-slate-200 z-10">
       {/* Left: Mobile Menu Toggle & Search Bar */}
       <div className="flex items-center gap-4 flex-1">
         <button className="md:hidden p-2 text-slate-500 hover:bg-slate-100 rounded-lg">
           <Menu className="w-5 h-5" />
         </button>
 
-        <div className="relative w-full max-w-md hidden sm:block">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-          <input
-            type="text"
-            placeholder="Search boards, tasks..."
-            className="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all"
-          />
-        </div>
       </div>
 
       {/* Right: User Avatar & Dropdown (Using Shadcn) */}
@@ -51,7 +44,7 @@ export function Topbar({ user }: { user?: IUser }) {
                 typeof user.photo === "string" &&
                 user.photo !== "null" && (
                   <AvatarImage
-                    src={user.photo}
+                    src={getImageUrl(user.photo) as string}
                     alt="User Avatar"
                     className="object-cover"
                   />
@@ -71,7 +64,7 @@ export function Topbar({ user }: { user?: IUser }) {
             <ChevronDown className="w-3.5 h-3.5 text-slate-400 hidden sm:block transition-transform group-data-[state=open]:rotate-180" />
           </DropdownMenuTrigger>
           
-          <DropdownMenuContent align="end" className="w-60 mt-2 bg-white/85 backdrop-blur-2xl border border-slate-200/50 shadow-xl shadow-slate-200/20 rounded-2xl p-1.5">
+          <DropdownMenuContent align="end" className="w-60 mt-2 bg-slate-50/85 backdrop-blur-2xl border border-slate-200/50 shadow-xl shadow-slate-200/20 rounded-2xl p-1.5">
             <DropdownMenuGroup className="sm:hidden">
               <DropdownMenuLabel className="font-normal p-3">
                 <div className="flex items-center gap-3">
@@ -80,7 +73,7 @@ export function Topbar({ user }: { user?: IUser }) {
                       typeof user.photo === "string" &&
                       user.photo !== "null" && (
                         <AvatarImage
-                          src={user.photo}
+                          src={getImageUrl(user.photo) as string}
                           alt="User Avatar"
                           className="object-cover"
                         />
@@ -102,6 +95,15 @@ export function Topbar({ user }: { user?: IUser }) {
             </DropdownMenuGroup>
             <DropdownMenuSeparator className="sm:hidden bg-slate-100" />
             
+            <DropdownMenuItem
+              render={<Link href="/dashboard/profile" />}
+              className="rounded-xl cursor-pointer text-slate-600 hover:text-slate-900 focus:bg-indigo-50 focus:text-indigo-700 p-2.5"
+            >
+              <div className="w-8 h-8 rounded-lg bg-indigo-100 flex items-center justify-center mr-3 shadow-sm">
+                <User className="w-4 h-4 text-indigo-600" />
+              </div>
+              <span className="text-sm font-semibold">My Profile</span>
+            </DropdownMenuItem>
             <DropdownMenuItem
               render={<Link href="/" />}
               className="rounded-xl cursor-pointer text-slate-600 hover:text-slate-900 focus:bg-sky-50 focus:text-sky-700 p-2.5"

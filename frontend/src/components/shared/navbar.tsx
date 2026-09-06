@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { cookies } from "next/headers";
 import { UserNavAction } from "./user-nav-action";
+import { NavLinks } from "./nav-links";
 
 export async function Navbar() {
   const cookieStore = await cookies();
@@ -23,7 +24,7 @@ export async function Navbar() {
           <div className="flex items-center gap-2">
             <Link href="/" className="flex items-center gap-2">
               <div className="w-8 h-8 rounded-md bg-gradient-to-br from-primary to-indigo-600 flex items-center justify-center shadow-sm">
-                <div className="w-3.5 h-3.5 rounded-sm bg-white"></div>
+                <div className="w-3.5 h-3.5 rounded-sm bg-slate-50"></div>
               </div>
               <span className="font-bold text-xl tracking-tight text-foreground">
                 ZenBoard
@@ -32,26 +33,7 @@ export async function Navbar() {
           </div>
 
           {/* Desktop Navigation Links */}
-          <nav className="hidden md:flex items-center gap-8">
-            <Link
-              href="/"
-              className="text-sm font-medium text-foreground hover:text-primary transition-colors"
-            >
-              Home
-            </Link>
-            <Link
-              href="/about"
-              className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
-            >
-              About Us
-            </Link>
-            <Link
-              href="/blog"
-              className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
-            >
-              Blog
-            </Link>
-          </nav>
+          <NavLinks />
 
           {/* Action Buttons */}
           <div className="flex items-center gap-4">

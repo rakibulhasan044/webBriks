@@ -8,15 +8,15 @@ export default function DashboardPage() {
       
       {/* Placeholder for dashboard widgets */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+        <div className="bg-slate-50 p-6 rounded-2xl border border-slate-200 shadow-sm">
           <h3 className="font-semibold text-slate-700 mb-2">Total Boards</h3>
           <p className="text-3xl font-bold text-slate-900">3</p>
         </div>
-        <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+        <div className="bg-slate-50 p-6 rounded-2xl border border-slate-200 shadow-sm">
           <h3 className="font-semibold text-slate-700 mb-2">Active Tasks</h3>
           <p className="text-3xl font-bold text-slate-900">12</p>
         </div>
-        <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+        <div className="bg-slate-50 p-6 rounded-2xl border border-slate-200 shadow-sm">
           <h3 className="font-semibold text-slate-700 mb-2">Team Members</h3>
           <p className="text-3xl font-bold text-slate-900">5</p>
         </div>

@@ -9,7 +9,7 @@ export function Footer() {
           <div className="col-span-2 md:col-span-1">
             <Link href="/" className="flex items-center gap-2 mb-4">
               <div className="w-6 h-6 rounded bg-gradient-to-br from-primary to-indigo-600 flex items-center justify-center">
-                <div className="w-2.5 h-2.5 rounded-[2px] bg-white"></div>
+                <div className="w-2.5 h-2.5 rounded-[2px] bg-slate-50"></div>
               </div>
               <span className="font-bold text-lg text-foreground">ZenBoard</span>
             </Link>
