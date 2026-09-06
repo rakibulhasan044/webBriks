@@ -14,6 +14,8 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { IUser } from "@/types/user.type";
 import { getImageUrl } from "@/lib/utils";
+import { MobileSidebar } from "./mobile-sidebar";
+
 
 export function Topbar({ user }: { user?: IUser }) {
   
@@ -28,14 +30,13 @@ export function Topbar({ user }: { user?: IUser }) {
     <header className="h-16 flex items-center justify-between px-6 bg-slate-50 border-b border-slate-200 z-10">
       {/* Left: Mobile Menu Toggle & Search Bar */}
       <div className="flex items-center gap-4 flex-1">
-        <button className="md:hidden p-2 text-slate-500 hover:bg-slate-100 rounded-lg">
-          <Menu className="w-5 h-5" />
-        </button>
+        <MobileSidebar user={user} />
 
       </div>
 
       {/* Right: User Avatar & Dropdown (Using Shadcn) */}
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-2 sm:gap-4">
+        
         <DropdownMenu>
           <DropdownMenuTrigger className="flex items-center gap-3 focus:outline-none rounded-xl p-1.5 pr-3 hover:bg-slate-50 hover:shadow-sm transition-all duration-200 border border-transparent hover:border-slate-200/80 group">
             <Avatar className="h-9 w-9 border-2 border-white shadow-sm ring-1 ring-slate-100 transition-transform group-hover:scale-105">

@@ -3,6 +3,11 @@
 import { motion } from "framer-motion";
 import { useState } from "react";
 
+interface FAQ {
+  q: string;
+  a: string;
+}
+
 export function FaqSection() {
   const faqs = [
     { q: "Is ZenBoard entirely free?", a: "We offer a generous free tier that covers most small teams. Advanced features require a premium subscription which you can upgrade to at any time." },
@@ -49,7 +54,7 @@ return (
   </section>
 );
 
-function FaqItem({ faq, index }: { faq: any, index: number }) {
+function FaqItem({ faq, index }: { faq: FAQ, index: number }) {
   const [isOpen, setIsOpen] = useState(false);
 
   return (

@@ -35,7 +35,7 @@ interface CreateTaskModalProps {
   members?: { id: string; name: string; photo?: string }[];
 }
 
-export function CreateTaskModal({ children, columnId, columns = [], members = [] }: CreateTaskModalProps) {
+export function CreateTaskModal({ children, columnId, columns = [], members = [], onOptimisticCreate }: any) {
   const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState<FormErrors>({});
@@ -97,17 +97,26 @@ export function CreateTaskModal({ children, columnId, columns = [], members = []
       return;
     }
 
-    setIsLoading(true);
-    try {
-      const payload: any = {
-        title: result.data.title,
-        description: result.data.description,
-        priority: result.data.priority,
-      };
-      if (result.data.assigneeIds && result.data.assigneeIds.length > 0) {
-        payload.assigneeIds = result.data.assigneeIds;
-      }
+    const payload: any = {
+      title: result.data.title,
+      description: result.data.description,
+      priority: result.data.priority,
+    };
+    if (result.data.assigneeIds && result.data.assigneeIds.length > 0) {
+      payload.assigneeIds = result.data.assigneeIds;
+    }
 
+    // Trigger Optimistic UI Update instantly
+    if (onOptimisticCreate) {
+      onOptimisticCreate(result.data.selectedColumnId, payload);
+    } else if (typeof window !== "undefined") {
+      window.dispatchEvent(new CustomEvent("optimisticCreate", { detail: { columnId: result.data.selectedColumnId, payload } }));
+    }
+    
+    // Close modal instantly for a snappy feel!
+    setIsOpen(false);
+    
+    try {
       // 1. Create the task
       const res = await taskService.createTask(result.data.selectedColumnId, payload);
       
@@ -124,17 +133,18 @@ export function CreateTaskModal({ children, columnId, columns = [], members = []
         }
         
         toast.success("Task created successfully!");
-        setIsOpen(false);
         setAttachment(null);
         setSelectedAssignees([]);
         router.refresh();
       } else {
         toast.error(res.message || "Failed to create task");
+        router.refresh();
       }
     } catch (error: any) {
       toast.error(error.message || "An unexpected error occurred");
+      router.refresh();
     } finally {
-      setIsLoading(false);
+      
     }
   };
 

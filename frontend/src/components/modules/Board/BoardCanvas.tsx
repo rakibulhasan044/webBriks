@@ -115,17 +115,71 @@ export default function BoardCanvas({ boardId, initialColumns, priorityStyles, m
   };
 
   const handleDeleteTask = async (taskId: string) => {
+    // Optimistic UI update: instantly remove task from screen
+    setColumns(prev => prev.map((col: any) => ({
+      ...col,
+      tasks: col.tasks.filter((t: any) => t.id !== taskId)
+    })));
+
     try {
       const res = await taskService.deleteTask(taskId);
       if (res.success) {
         toast.success("Task deleted successfully");
-        router.refresh();
+        router.refresh(); // Background sync
       } else {
         toast.error(res.message || "Failed to delete task");
+        setColumns(initialColumns); // Rollback on failure
       }
     } catch (error: any) {
       toast.error(error.message || "You don't have permission to delete this task");
+      setColumns(initialColumns); // Rollback on failure
     }
+  };
+
+    React.useEffect(() => {
+    const handleEvent = (e: any) => {
+      const { columnId, payload } = e.detail;
+      
+      const tempTask = {
+        id: "temp-" + Date.now(),
+        title: payload.title,
+        description: payload.description,
+        priority: payload.priority ? payload.priority.charAt(0).toUpperCase() + payload.priority.slice(1).toLowerCase() : "Medium",
+        comments: 0,
+        attachments: [],
+        assignees: payload.assigneeIds ? payload.assigneeIds.map((id: string) => members.find((m: any) => m.id === id)).filter(Boolean) : []
+      };
+
+      setColumns(prev => prev.map((col: any) => {
+        if (col.id === columnId) {
+          return { ...col, tasks: [...col.tasks, tempTask] };
+        }
+        return col;
+      }));
+    };
+    
+    window.addEventListener('optimisticCreate', handleEvent);
+    return () => window.removeEventListener('optimisticCreate', handleEvent);
+  }, [members]);
+
+  const handleOptimisticCreate = (columnId: string, payload: any) => {
+    // Generate a temporary fake task to instantly place on the board
+    const tempTask = {
+      id: "temp-" + Date.now(),
+      title: payload.title,
+      description: payload.description,
+      priority: payload.priority ? payload.priority.charAt(0).toUpperCase() + payload.priority.slice(1).toLowerCase() : "Medium",
+      comments: 0,
+      attachments: [],
+      assignees: payload.assigneeIds ? payload.assigneeIds.map((id: string) => members.find((m: any) => m.id === id)).filter(Boolean) : []
+    };
+
+    setColumns(prev => prev.map((col: any) => {
+      if (col.id === columnId) {
+        return { ...col, tasks: [...col.tasks, tempTask] }; // Append to bottom as new tasks usually go to bottom, or prepend
+      }
+      return col;
+    }));
   };
 
   const openAttachment = (url: string) => {
@@ -392,7 +446,7 @@ return (
                     {provided.placeholder}
                     
                     {/* Add Task Button */}
-                    <CreateTaskModal columnId={col.id} members={members}>
+                    <CreateTaskModal columnId={col.id} members={members} onOptimisticCreate={handleOptimisticCreate}>
                       <button className={`w-full py-2.5 flex items-center justify-center gap-2 text-sm font-bold rounded-xl transition-all border border-dashed mt-2 ${theme.addBtn}`}>
                         <Plus className="w-4 h-4" />
                         Add task
@@ -444,6 +498,7 @@ return (
           members={members} 
           isOpen={true} 
           onClose={() => setTaskToEdit(null)} 
+          onOptimisticEdit={handleOptimisticEdit}
         />
       )}
     </DragDropContext>

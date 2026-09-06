@@ -35,7 +35,7 @@ interface EditTaskModalProps {
   onClose: () => void;
 }
 
-export function EditTaskModal({ task, columns = [], members = [], isOpen, onClose }: EditTaskModalProps) {
+export function EditTaskModal({ task, columns = [], members = [], isOpen, onClose, onOptimisticEdit }: any) {
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState<FormErrors>({});
   const [attachment, setAttachment] = useState<File | null>(null);
@@ -168,8 +168,9 @@ export function EditTaskModal({ task, columns = [], members = [], isOpen, onClos
       }
     } catch (error: any) {
       toast.error(error.message || "An unexpected error occurred");
+      router.refresh();
     } finally {
-      setIsLoading(false);
+      
     }
   };
 
