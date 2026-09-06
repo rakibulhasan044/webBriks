@@ -11,7 +11,7 @@ export default async function ProfilePage() {
   const cookieStore = await cookies();
   const userCookie = cookieStore.get("currentUser")?.value;
   let user = null;
-  
+
   if (userCookie) {
     try {
       user = JSON.parse(userCookie);
@@ -23,8 +23,12 @@ export default async function ProfilePage() {
   return (
     <div className="max-w-4xl mx-auto space-y-6">
       <div className="flex flex-col gap-2">
-        <h1 className="text-3xl font-bold tracking-tight text-slate-900">Profile Settings</h1>
-        <p className="text-slate-500">Manage your account details and password.</p>
+        <h1 className="text-3xl font-bold tracking-tight text-slate-900">
+          Profile Settings
+        </h1>
+        <p className="text-slate-500">
+          Manage your account details and password.
+        </p>
       </div>
 
       <ProfileSettings user={user} />

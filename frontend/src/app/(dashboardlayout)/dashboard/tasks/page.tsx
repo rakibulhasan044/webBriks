@@ -91,7 +91,7 @@ export default async function MyTasksPage() {
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
             {/* Left: Title & Desc */}
             <div className="flex items-start gap-4">
-              <div className="p-3 bg-gradient-to-br from-indigo-500 to-violet-600 rounded-xl shadow-lg shadow-indigo-200 shrink-0 mt-0.5">
+              <div className="p-3 bg-gradient-to-br from-indigo-400 to-violet-700 rounded-xl shadow-lg shadow-indigo-200 shrink-0 mt-0.5">
                 <ListTodo className="w-6 h-6 text-white" />
               </div>
               <div>

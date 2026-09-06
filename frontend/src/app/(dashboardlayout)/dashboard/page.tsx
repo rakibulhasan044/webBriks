@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { getImageUrl } from "@/lib/utils";
+import Image from "next/image";
 
 export const dynamic = "force-dynamic";
 
@@ -114,7 +115,7 @@ export default async function DashboardPage() {
         </div>
         <Link
           href="/dashboard/boards"
-          className="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-slate-900 text-white rounded-xl text-sm font-semibold shadow-lg shadow-slate-900/20 hover:bg-slate-800 hover:shadow-xl hover:shadow-slate-900/25 hover:-translate-y-0.5 transition-all duration-300 w-full md:w-auto"
+          className="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-linear-to-br from-primary to-indigo-600 text-white rounded-xl text-sm font-semibold shadow-lg shadow-slate-900/20 hover:bg-slate-800 hover:shadow-xl hover:shadow-slate-900/25 hover:-translate-y-0.5 transition-all duration-300 w-full md:w-auto"
         >
           <KanbanSquare className="w-4 h-4" />
           View All Boards
@@ -180,7 +181,7 @@ export default async function DashboardPage() {
             </div>
             {/* Subtle gradient overlay on hover */}
             <div
-              className={`absolute inset-0 rounded-2xl bg-gradient-to-br from-${stat.color}-50/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none`}
+              className={`absolute inset-0 rounded-2xl bg-linear-to-br from-${stat.color}-50/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none`}
             />
           </div>
         ))}
@@ -210,14 +211,14 @@ export default async function DashboardPage() {
           <div className="bg-slate-50 rounded-2xl border border-slate-200/80 shadow-[0_2px_8px_-2px_rgba(0,0,0,0.04)] overflow-hidden">
             {pendingTasks.length === 0 ? (
               <div className="p-12 text-center">
-                <div className="w-14 h-14 bg-gradient-to-br from-emerald-50 to-emerald-100 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-sm">
+                <div className="w-14 h-14 bg-linear-to-br from-emerald-50 to-emerald-100 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-sm">
                   <CheckSquare className="w-7 h-7 text-emerald-500" />
                 </div>
                 <h3 className="text-sm font-bold text-slate-800">
                   No pending tasks!
                 </h3>
                 <p className="text-sm text-slate-400 mt-1.5 font-medium">
-                  You're all caught up on your assigned work.
+                  You&apos;re all caught up on your assigned work.
                 </p>
               </div>
             ) : (
@@ -229,7 +230,7 @@ export default async function DashboardPage() {
                     className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 hover:bg-slate-50/80 transition-colors group relative"
                   >
                     {/* Left accent bar on hover */}
-                    <div className="absolute left-0 top-4 bottom-4 w-[3px] rounded-r-full bg-indigo-500 opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
+                    <div className="absolute left-0 top-4 bottom-4 w-0.75 rounded-r-full bg-indigo-500 opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
 
                     <div className="flex-1 min-w-0 pl-0 group-hover:pl-1 transition-all duration-200">
                       <div className="flex items-center gap-2 mb-1.5">
@@ -296,7 +297,7 @@ export default async function DashboardPage() {
             {recentBoards.length === 0 ? (
               <div className="bg-slate-50 p-8 rounded-2xl border border-slate-200/80 shadow-[0_2px_8px_-2px_rgba(0,0,0,0.04)] text-center">
                 <p className="text-sm text-slate-400 font-medium mb-4">
-                  You haven't joined any boards yet.
+                  You haven&apos;t joined any boards yet.
                 </p>
                 <Link
                   href="/dashboard/boards"
@@ -312,7 +313,7 @@ export default async function DashboardPage() {
                   href={`/dashboard/boards/${board.id}`}
                   className="group block bg-slate-50 rounded-2xl border border-slate-200/80 shadow-[0_2px_8px_-2px_rgba(0,0,0,0.04)] overflow-hidden hover:shadow-[0_12px_32px_-8px_rgba(0,0,0,0.1)] hover:border-indigo-200/80 hover:-translate-y-0.5 transition-all duration-300"
                 >
-                  <div className="h-28 relative overflow-hidden">
+                  {/* <div className="h-28 relative overflow-hidden">
                     {board.coverImage ? (
                       <img
                         src={getImageUrl(board.coverImage) as string}
@@ -323,6 +324,27 @@ export default async function DashboardPage() {
                       <div className="w-full h-full bg-gradient-to-br from-slate-100 to-slate-200" />
                     )}
                     <div className="absolute inset-0 bg-gradient-to-t from-slate-900/70 via-slate-900/20 to-transparent" />
+                    <div className="absolute bottom-3.5 left-4 right-4">
+                      <h3 className="text-white font-bold text-[15px] truncate drop-shadow-md">
+                        {board.title}
+                      </h3>
+                    </div>
+                  </div> */}
+
+                  <div className="h-28 relative overflow-hidden">
+                    {board.coverImage ? (
+                      <Image
+                        src={getImageUrl(board.coverImage) as string}
+                        alt={board.title}
+                        fill
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
+                      />
+                    ) : (
+                      <div className="w-full h-full bg-linear-to-br from-slate-100 to-slate-200" />
+                    )}
+
+                    <div className="absolute inset-0 bg-linear-to-t from-slate-900/70 via-slate-900/20 to-transparent" />
+
                     <div className="absolute bottom-3.5 left-4 right-4">
                       <h3 className="text-white font-bold text-[15px] truncate drop-shadow-md">
                         {board.title}

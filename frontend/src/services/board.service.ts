@@ -1,5 +1,4 @@
 import { httpClient } from "@/lib/axios/httpClient";
-import { ApiResponse, PaginatedResponse } from "@/types/api.types";
 
 export interface IBoard {
   id: string;

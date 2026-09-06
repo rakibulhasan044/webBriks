@@ -125,7 +125,7 @@ export function ProfileSettings({ user }: { user: any }) {
           onClick={() => setActiveTab("profile")}
           className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-colors ${
             activeTab === "profile" 
-              ? "bg-indigo-600 text-white shadow-sm" 
+              ? "bg-blue-400 text-white shadow-sm" 
               : "text-slate-600 hover:bg-slate-200/50 hover:text-slate-900"
           }`}
         >
@@ -136,7 +136,7 @@ export function ProfileSettings({ user }: { user: any }) {
           onClick={() => setActiveTab("password")}
           className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-colors ${
             activeTab === "password" 
-              ? "bg-indigo-600 text-white shadow-sm" 
+              ? "bg-blue-400 text-white shadow-sm" 
               : "text-slate-600 hover:bg-slate-200/50 hover:text-slate-900"
           }`}
         >
@@ -225,7 +225,7 @@ export function ProfileSettings({ user }: { user: any }) {
                 <button
                   type="submit"
                   disabled={isUpdatingProfile}
-                  className="flex items-center justify-center gap-2 px-6 py-2.5 bg-indigo-600 text-white font-medium rounded-lg hover:bg-indigo-700 transition-colors disabled:opacity-70 disabled:cursor-not-allowed"
+                  className="flex items-center justify-center gap-2 px-6 py-2.5 bg-linear-to-br from-primary to-indigo-600 text-white font-medium rounded-lg shadow-md shadow-indigo-200/50 hover:bg-indigo-700 transition-all active:scale-[0.98] cursor-pointer disabled:opacity-70 disabled:cursor-not-allowed"
                 >
                   {isUpdatingProfile ? (
                     <Loader2 className="w-4 h-4 animate-spin" />
@@ -294,7 +294,7 @@ export function ProfileSettings({ user }: { user: any }) {
                 <button
                   type="submit"
                   disabled={isChangingPassword}
-                  className="flex items-center justify-center gap-2 px-6 py-2.5 bg-indigo-600 text-white font-medium rounded-lg hover:bg-indigo-700 transition-colors disabled:opacity-70 disabled:cursor-not-allowed"
+                  className="flex items-center justify-center gap-2 px-6 py-2.5 bg-linear-to-br from-primary to-indigo-600 text-white font-medium rounded-lg shadow-md shadow-indigo-200/50 hover:bg-indigo-700 transition-all active:scale-[0.98] cursor-pointer disabled:opacity-70 disabled:cursor-not-allowed"
                 >
                   {isChangingPassword ? (
                     <Loader2 className="w-4 h-4 animate-spin" />

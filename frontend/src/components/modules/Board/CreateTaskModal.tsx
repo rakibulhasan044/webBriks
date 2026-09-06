@@ -296,7 +296,7 @@ export function CreateTaskModal({ children, columnId, columns = [], members = []
           </div>
           <DialogFooter className="mt-6">
             <DialogClose render={<Button type="button" variant="outline" disabled={isLoading}>Cancel</Button>} />
-            <Button type="submit" className="bg-indigo-600 hover:bg-indigo-700 text-white" disabled={isLoading}>
+            <Button type="submit" className="" disabled={isLoading}>
               {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Create Task
             </Button>

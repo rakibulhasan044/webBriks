@@ -2,8 +2,11 @@ import { NextRequest, NextResponse } from "next/server";
 
 const AUTH_ROUTES = ["/login", "/register"];
 const PUBLIC_ROUTES = ["/"];
-const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_BASE_URL || "http://127.0.0.1:6001/api/v1";
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
+
+if(!API_BASE_URL) {
+  throw new Error("NEXT_PUBLIC_API_BASE_URL is not defined in the env")
+}
 
 // Simple Edge-compatible JWT decoder
 function parseJwt(token: string) {
@@ -62,7 +65,11 @@ export async function proxy(request: NextRequest) {
     }
 
     const isAuth = AUTH_ROUTES.includes(pathname);
-    const isPublic = PUBLIC_ROUTES.includes(pathname) || pathname.startsWith("/about") || pathname.startsWith("/pricing");
+    const isPublic =
+      PUBLIC_ROUTES.includes(pathname) ||
+      pathname.startsWith("/about") ||
+      pathname.startsWith("/pricing") ||
+      pathname.startsWith("/blog");
 
     let response = NextResponse.next();
 

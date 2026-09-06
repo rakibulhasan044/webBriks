@@ -83,7 +83,7 @@ export default async function BoardsListingPage({
             <button type="submit" className="hidden"></button>
           </form>
           <CreateBoardModal>
-            <button className="flex items-center justify-center gap-2 px-5 py-2.5 text-sm font-bold text-white bg-indigo-600 rounded-xl shadow-lg shadow-indigo-200/50 hover:bg-indigo-700 hover:shadow-indigo-300/50 hover:-translate-y-0.5 transition-all duration-200 whitespace-nowrap">
+            <button className="flex items-center justify-center gap-2 px-5 py-2.5 text-sm font-bold text-white bg-linear-to-br from-primary to-indigo-600 rounded-xl shadow-lg shadow-indigo-200/50 hover:bg-indigo-700 hover:shadow-indigo-300/50 hover:-translate-y-0.5 transition-all duration-200 whitespace-nowrap">
               <Plus className="w-4 h-4" />
               Create Board
             </button>

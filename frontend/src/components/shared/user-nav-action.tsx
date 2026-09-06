@@ -19,14 +19,14 @@ export function UserNavAction({ user }: { user: any | null }) {
     document.cookie = "accessToken=; path=/; max-age=0";
     document.cookie = "refreshToken=; path=/; max-age=0";
     document.cookie = "currentUser=; path=/; max-age=0";
-    window.location.href = "/login";
+    window.location.replace("/");
   };
 
   if (!user) {
     return (
       <Link
         href="/login"
-        className="px-5 py-2 text-sm font-medium bg-slate-900 text-white rounded-lg shadow-sm hover:bg-slate-800 transition-colors"
+        className="px-5 py-2 text-sm font-medium bg-linear-to-br from-primary to-indigo-600 text-white rounded-lg shadow-sm hover:bg-slate-800 transition-colors"
       >
         Log in
       </Link>

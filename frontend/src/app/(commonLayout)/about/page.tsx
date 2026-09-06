@@ -1,4 +1,5 @@
 import { Metadata } from "next";
+import Image from "next/image";
 
 export const metadata: Metadata = {
   title: "About Us | ZenBoard",
@@ -14,29 +15,38 @@ export default function AboutPage() {
           Empowering Teams to Do Their Best Work
         </h1>
         <p className="text-lg text-slate-500 leading-relaxed">
-          At ZenBoard, we believe that project management shouldn't feel like a chore. 
-          Our mission is to create a seamless, intuitive, and delightful experience for teams 
-          of all sizes to collaborate and achieve their goals.
+          At ZenBoard, we believe that project management shouldn&apos;t feel
+          like a chore. Our mission is to create a seamless, intuitive, and
+          delightful experience for teams of all sizes to collaborate and
+          achieve their goals.
         </p>
       </div>
 
       {/* Story Section */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center mb-24">
-        <div className="bg-slate-100 rounded-3xl h-[400px] w-full flex items-center justify-center">
-          <span className="text-slate-400 font-medium">Illustration</span>
+        <div className="bg-slate-100 rounded-3xl h-[400px] w-full overflow-hidden">
+          <Image
+            src="/about-us.jpg"
+            alt="Our Story"
+            width={400}
+            height={400}
+            className="w-full h-full object-cover"
+          />
         </div>
         <div>
           <h2 className="text-3xl font-bold text-slate-900 mb-6">Our Story</h2>
           <div className="space-y-4 text-slate-600 leading-relaxed">
             <p>
-              ZenBoard started as a small internal tool built out of frustration with overly 
-              complex project management software. We wanted something that was as powerful as 
-              the big players but as easy to use as a simple to-do list.
+              ZenBoard started as a small internal tool built out of frustration
+              with overly complex project management software. We wanted
+              something that was as powerful as the big players but as easy to
+              use as a simple to-do list.
             </p>
             <p>
-              After sharing it with a few friends and seeing how much it helped their teams, 
-              we decided to polish it up and share it with the world. Today, ZenBoard helps 
-              thousands of teams stay organized and focused on what really matters.
+              After sharing it with a few friends and seeing how much it helped
+              their teams, we decided to polish it up and share it with the
+              world. Today, ZenBoard helps thousands of teams stay organized and
+              focused on what really matters.
             </p>
           </div>
         </div>
@@ -49,12 +59,23 @@ export default function AboutPage() {
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {[
-            { title: "Simplicity", desc: "We design with clarity in mind, stripping away the unnecessary." },
-            { title: "Collaboration", desc: "Great things are never done by one person. They're done by a team." },
-            { title: "Performance", desc: "Your tools should never slow you down. Speed is a feature." }
+            {
+              title: "Simplicity",
+              desc: "We design with clarity in mind, stripping away the unnecessary.",
+            },
+            {
+              title: "Collaboration",
+              desc: "Great things are never done by one person. They're done by a team.",
+            },
+            {
+              title: "Performance",
+              desc: "Your tools should never slow you down. Speed is a feature.",
+            },
           ].map((value, i) => (
             <div key={i} className="bg-slate-50 p-6 rounded-2xl shadow-sm">
-              <h3 className="text-xl font-bold text-slate-900 mb-3">{value.title}</h3>
+              <h3 className="text-xl font-bold text-slate-900 mb-3">
+                {value.title}
+              </h3>
               <p className="text-slate-500">{value.desc}</p>
             </div>
           ))}

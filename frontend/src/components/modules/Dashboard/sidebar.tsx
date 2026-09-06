@@ -29,10 +29,12 @@ return (
       {/* Logo */}
       <div className="flex h-16 shrink-0 items-center px-5 border-b border-slate-100">
         <Link href="/" className="flex items-center gap-2.5 group">
-          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center shadow-md shadow-indigo-200/50 group-hover:shadow-lg group-hover:shadow-indigo-200/60 transition-all duration-300">
-            <div className="w-3 h-3 rounded-[3px] bg-slate-50/90"></div>
+          <div className="w-8 h-8 rounded-md bg-gradient-to-br from-primary to-indigo-600 flex items-center justify-center shadow-sm">
+            <div className="w-3.5 h-3.5 rounded-sm bg-slate-50"></div>
           </div>
-          <span className="text-lg font-bold text-slate-900 tracking-tight">ZenBoard</span>
+          <span className="font-bold text-xl tracking-tight text-slate-900">
+            ZenBoard
+          </span>
         </Link>
       </div>
 
@@ -97,7 +99,7 @@ return (
             document.cookie = "accessToken=; path=/; max-age=0";
             document.cookie = "refreshToken=; path=/; max-age=0";
             document.cookie = "currentUser=; path=/; max-age=0";
-            window.location.href = "/login";
+            window.location.replace("/");
           }}
           className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-[13px] font-semibold text-slate-500 hover:text-red-600 hover:bg-red-50/60 transition-all duration-200"
         >

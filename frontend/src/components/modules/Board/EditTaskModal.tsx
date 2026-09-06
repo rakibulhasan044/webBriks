@@ -361,7 +361,7 @@ export function EditTaskModal({ task, columns = [], members = [], isOpen, onClos
           </div>
           <DialogFooter className="mt-6">
             <Button type="button" variant="outline" onClick={onClose} disabled={isLoading}>Cancel</Button>
-            <Button type="submit" className="bg-indigo-600 hover:bg-indigo-700 text-white" disabled={isLoading}>
+            <Button type="submit" className="" disabled={isLoading}>
               {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Edit Task
             </Button>

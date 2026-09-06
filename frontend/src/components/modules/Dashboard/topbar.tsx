@@ -23,7 +23,7 @@ export function Topbar({ user }: { user?: IUser }) {
     document.cookie = "accessToken=; path=/; max-age=0";
     document.cookie = "refreshToken=; path=/; max-age=0";
     document.cookie = "currentUser=; path=/; max-age=0";
-    window.location.href = "/login";
+    window.location.replace("/");
   };
 
   return (
