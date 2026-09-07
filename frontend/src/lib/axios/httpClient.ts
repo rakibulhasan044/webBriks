@@ -132,9 +132,9 @@ instance.interceptors.response.use(
               );
           } else {
             // Client-side fallback cookie setting (basic)
-            document.cookie = `accessToken=${newAccessToken}; path=/; max-age=900; secure; samesite=lax`;
+            document.cookie = `accessToken=${newAccessToken}; path=/; max-age=900; samesite=lax`;
             if (newRefreshToken) {
-              document.cookie = `refreshToken=${newRefreshToken}; path=/; max-age=604800; secure; samesite=lax`;
+              document.cookie = `refreshToken=${newRefreshToken}; path=/; max-age=604800; samesite=lax`;
             }
           }
 

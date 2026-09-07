@@ -10,7 +10,7 @@ export const setCookie = async (
 
   cookieStore.set(name, value, {
     httpOnly: false,
-    secure: true,
+    secure: process.env.NODE_ENV === "production",
     sameSite: "lax",
     path: "/",
     maxAge: maxAgeInSeconds,
